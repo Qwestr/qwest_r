@@ -1,0 +1,11 @@
+[package]
+name = "qwest_r"
+version = "0.1.0"
+authors = ["Shawn Daichendt <shawn.daichendt@gmail.com>"]
+edition = "2018"
+description = "A game about games, life, and everything in-between."
+license = "MIT OR Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
