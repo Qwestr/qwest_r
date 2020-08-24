@@ -1,18 +1,21 @@
 use rand::Rng;
 use std::io;
 
+fn get_user_input(input: &mut String) {
+    io::stdin()
+        .read_line(input)
+        .expect("I'm sorry, I didn't quite understand that.");
+}
+
 fn main() {
     // Welcome text
-    println!("Welcome to qwest_r!");
+    println!("Welcome to Qwestr!");
     println!("I'm terribly sorry, but I don't seem to know who you are :(");
     println!("Let's start with a name.  What should I call you?");
 
     // Enter your name
-    let mut name = String::new();
-    
-    io::stdin()
-        .read_line(&mut name)
-        .expect("I'm sorry, I didn't quite understand that.");
+    let mut name = String::new();    
+    get_user_input(&mut name);
 
     // Response text
     println!("Hello {}!  Pleasure to meet you :)", name.trim());
@@ -25,11 +28,9 @@ fn main() {
         
         // Get answer
         let mut answer = String::new();
-        
-        io::stdin()
-            .read_line(&mut answer)
-            .expect("I'm sorry, I didn't quite understand that.");
+        get_user_input(&mut answer);
 
+        // Cast answer to a number
         let answer: u32 = match answer.trim().parse() {
             Ok(num) => num,
             Err(_) => continue,
@@ -41,7 +42,7 @@ fn main() {
                 println!("Awesome!");
                 break;
             },
-            2 => println!("Are you sure?"),
+            2 => println!("I won't take no for an answer!  Are you ready?"),
             _ => println!("(I'm sorry, I didn't quite understand that."),
         }
     }
@@ -55,11 +56,9 @@ fn main() {
         
         // Get answer
         let mut answer = String::new();
-        
-        io::stdin()
-            .read_line(&mut answer)
-            .expect("I'm sorry, I didn't quite understand that.");
+        get_user_input(&mut answer);
 
+        // Cast answer to a number
         let answer: u32 = match answer.trim().parse() {
             Ok(num) => num,
             Err(_) => continue,
