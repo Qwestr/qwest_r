@@ -1,6 +1,14 @@
 use rand::Rng;
 use std::io;
 
+// Structs
+struct Player {
+    name: String,
+    max_health: u32,
+    current_health: u32,
+}
+
+// Functions
 fn get_user_input(input: &mut String) {
     // Read line of input
     io::stdin()
