@@ -2,12 +2,14 @@ use rand::Rng;
 use std::io;
 
 fn get_user_input(input: &mut String) {
+    // Read line of input
     io::stdin()
         .read_line(input)
         .expect("I'm sorry, I didn't quite understand that.");
 }
 
 fn roll(min: u32, max: u32) -> u32 {
+    // Generate random number between min and max + 1 (exclusive)
     rand::thread_rng().gen_range(min, max + 1)
 }
 
