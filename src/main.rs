@@ -7,6 +7,10 @@ fn get_user_input(input: &mut String) {
         .expect("I'm sorry, I didn't quite understand that.");
 }
 
+fn roll(min: u32, max: u32) -> u32 {
+    rand::thread_rng().gen_range(min, max + 1)
+}
+
 fn main() {
     // Welcome text
     println!("Welcome to Qwestr!");
@@ -68,11 +72,11 @@ fn main() {
         match answer {
             1 => {
                 // Roll for attack
-                let attack_roll = rand::thread_rng().gen_range(1, 7);
+                let attack_roll = roll(2, 6);
                 println!("You attack with your cool sword for {} damage!", attack_roll);
 
                 // Roll for counter attack
-                let counter_attack_roll = rand::thread_rng().gen_range(1, 4);
+                let counter_attack_roll = roll(1, 3);
                 println!("The skeleton attacks you for {} damage!", counter_attack_roll);
 
             },
