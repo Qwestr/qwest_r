@@ -4,13 +4,13 @@ use std::io;
 // Structs
 struct Player {
     name: String,
-    max_health: u32,
-    current_health: u32,
+    max_health: i32,
+    current_health: i32,
 }
 
 struct Enemy {
-    max_health: u32,
-    current_health: u32,
+    max_health: i32,
+    current_health: i32,
 }
 
 // Functions
@@ -21,7 +21,7 @@ fn get_user_input(input: &mut String) {
         .expect("I'm sorry, I didn't quite understand that.");
 }
 
-fn roll(min: u32, max: u32) -> u32 {
+fn roll(min: i32, max: i32) -> i32 {
     // Generate random number between min and max + 1 (exclusive)
     rand::thread_rng().gen_range(min, max + 1)
 }
@@ -37,7 +37,7 @@ fn main() {
     get_user_input(&mut name);
 
     // Create player
-    let player = Player {
+    let mut player = Player {
         name: String::from(name.trim()),
         max_health: 30,
         current_health: 30,
@@ -74,9 +74,9 @@ fn main() {
     }
 
     // Create enemy
-    let enemy = Enemy {
-        max_health: 15,
-        current_health: 15,
+    let mut enemy = Enemy {
+        max_health: 20,
+        current_health: 20,
     };
 
     // Encounter text
@@ -99,18 +99,35 @@ fn main() {
         // Determine response action
         match answer {
             1 => {
-                // Roll for attack
-                let attack_roll = roll(2, 6);
+                // Roll for player attack
+                let player_attack_roll = roll(1, 6);
+
+                // Apply attack damage to the enemy
+                enemy.current_health -= player_attack_roll;
 
                 // Result text
-                println!("You attack with your cool sword for {} damage!", attack_roll);
+                println!("You attack with your cool sword for {} damage!", player_attack_roll);
+                if enemy.current_health <= 0 {
+                    println!("You defeated the skeleton!");
+                    break;
+                } else {
+                    println!("The skeleton has {} of {} health remaining", enemy.current_health, enemy.max_health);
+                }
 
-                // Roll for counter attack
-                let counter_attack_roll = roll(1, 3);
+                // Roll for enemy attack
+                let enemy_attack_roll = roll(1, 3);
+
+                // Apply attack damage to the player
+                player.current_health -= enemy_attack_roll;
 
                 // Result text
-                println!("The skeleton attacks you for {} damage!", counter_attack_roll);
-
+                println!("The skeleton attacks you for {} damage!", enemy_attack_roll);
+                if player.current_health <= 0 {
+                    println!("You were defeated!");
+                    break;
+                } else {
+                    println!("You have {} of {} health remaining", player.current_health, player.max_health);
+                }
             },
             2 => {
                 println!("Bye!");
