@@ -8,6 +8,11 @@ struct Player {
     current_health: u32,
 }
 
+struct Enemy {
+    max_health: u32,
+    current_health: u32,
+}
+
 // Functions
 fn get_user_input(input: &mut String) {
     // Read line of input
@@ -68,7 +73,13 @@ fn main() {
         }
     }
 
-    // First encounter
+    // Create enemy
+    let enemy = Enemy {
+        max_health: 15,
+        current_health: 15,
+    };
+
+    // Encounter text
     println!("Uh oh, you encounter an animated skeleton!  He wants to attack you!");
     println!("What do you want to do?");
     loop {
@@ -90,10 +101,14 @@ fn main() {
             1 => {
                 // Roll for attack
                 let attack_roll = roll(2, 6);
+
+                // Result text
                 println!("You attack with your cool sword for {} damage!", attack_roll);
 
                 // Roll for counter attack
                 let counter_attack_roll = roll(1, 3);
+
+                // Result text
                 println!("The skeleton attacks you for {} damage!", counter_attack_roll);
 
             },
