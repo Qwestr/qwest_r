@@ -31,8 +31,15 @@ fn main() {
     let mut name = String::new();    
     get_user_input(&mut name);
 
+    // Create player
+    let player = Player {
+        name: String::from(name.trim()),
+        max_health: 30,
+        current_health: 30,
+    };
+
     // Response text
-    println!("Hello {}!  Pleasure to meet you :)", name.trim());
+    println!("Hello {}!  Pleasure to meet you :)", player.name);
 
     // Question text
     println!("So, are you ready to start your first adventure?");
