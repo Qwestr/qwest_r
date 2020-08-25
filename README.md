@@ -6,7 +6,7 @@ A text-based adventure, built with [Rust](https://www.rust-lang.org/)
 
 ## How To Start
 
-1.  Install all required packages using `yarn install`
+1.  [Install Rust](https://www.rust-lang.org/tools/install)
 
 2.  Create a file in the `/prisma` dir called `dev.db`.
 
