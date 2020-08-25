@@ -11,7 +11,7 @@ pub fn first_adventure_start() {
       println!("(1) Yes (2) No");
     
       // Get user selection
-      let selection = crate::utils::get_user_selection();
+      let selection = super::get_user_selection();
 
       // Determine response action
       match selection {
