@@ -1,3 +1,6 @@
+use qwest_r::play;
+
 fn main() {
-    println!("Welcome to qwest_r!");
+    // Start the game
+    play();
 }
