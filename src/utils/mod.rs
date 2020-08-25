@@ -1,6 +1,7 @@
 use std::io;
 use rand::Rng;
 
+pub mod models;
 pub mod prompts;
 
 pub fn get_user_input(input: &mut String) {
