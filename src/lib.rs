@@ -1,7 +1,11 @@
-use rand::Rng;
-use std::io;
+mod utils;
 
 // Structs
+struct Enemy {
+    max_health: i32,
+    current_health: i32,
+}
+
 struct Player {
     name: String,
     max_health: i32,
@@ -24,13 +28,13 @@ impl Player {
             println!("(1) Attack (2) Run");
           
             // Get user selection
-            let selection = get_user_selection();
+            let selection = utils::get_user_selection();
     
             // Determine response action
             match selection {
                 Some(1) => {
                     // Roll for player attack
-                    let player_attack_roll = roll(1, 6);
+                    let player_attack_roll = utils::roll(1, 6);
     
                     // Apply attack damage to the enemy
                     enemy.current_health -= player_attack_roll;
@@ -45,7 +49,7 @@ impl Player {
                     }
     
                     // Roll for enemy attack
-                    let enemy_attack_roll = roll(1, 3);
+                    let enemy_attack_roll = utils::roll(1, 3);
     
                     // Apply attack damage to the player
                     self.current_health -= enemy_attack_roll;
@@ -67,36 +71,7 @@ impl Player {
     }
 }
 
-struct Enemy {
-    max_health: i32,
-    current_health: i32,
-}
-
 // Functions
-fn roll(min: i32, max: i32) -> i32 {
-    // Generate random number between min and max + 1 (exclusive)
-    rand::thread_rng().gen_range(min, max + 1)
-}
-
-fn get_user_input(input: &mut String) {
-    // Read line of input
-    io::stdin()
-        .read_line(input)
-        .expect("I'm sorry, I didn't quite understand that.");
-}
-
-fn get_user_selection() -> Option<i32> {
-    // Get input
-    let mut input = String::new();
-    match io::stdin().read_line(&mut input) {
-        Ok(_) => match input.trim().parse() {
-            Ok(num) => Some(num),
-            Err(_) => None,
-        },
-        Err(_) => None,
-    }
-}
-
 fn present_welcome_text() {
     // Welcome text
     println!("Welcome to Qwestr!");
@@ -110,7 +85,7 @@ fn present_adventure_start_prompt() {
         println!("(1) Yes (2) No");
       
         // Get user selection
-        let selection = get_user_selection();
+        let selection = utils::get_user_selection();
 
         // Determine response action
         match selection {
@@ -132,7 +107,7 @@ fn create_player() -> Player {
 
     // Get name input
     let mut name = String::new();    
-    get_user_input(&mut name);
+    utils::get_user_input(&mut name);
 
     // Create player
     let player = Player {
