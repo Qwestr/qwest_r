@@ -33,14 +33,20 @@ fn get_user_selection() -> Option<i32> {
     }
 }
 
+fn present_welcome_text() {
+    // Welcome text
+    println!("Welcome to Qwestr!");
+}
+
 fn roll(min: i32, max: i32) -> i32 {
     // Generate random number between min and max + 1 (exclusive)
     rand::thread_rng().gen_range(min, max + 1)
 }
 
 pub fn play() {
-    // Welcome text
-    println!("Welcome to Qwestr!");
+    // Present welcome text
+    present_welcome_text();
+    
     println!("I'm terribly sorry, but I don't seem to know who you are :(");
     println!("Let's start with a name.  What should I call you?");
 
