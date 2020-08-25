@@ -1,5 +1,4 @@
 use rand::Rng;
-// use std::error::Error;
 use std::io;
 
 // Structs
@@ -22,21 +21,21 @@ fn get_user_input(input: &mut String) {
         .expect("I'm sorry, I didn't quite understand that.");
 }
 
-fn roll(min: i32, max: i32) -> i32 {
-    // Generate random number between min and max + 1 (exclusive)
-    rand::thread_rng().gen_range(min, max + 1)
-}
-
 fn get_user_selection() -> Option<i32> {
     // Get input
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
-        Ok(n) => match input.trim().parse() {
+        Ok(_) => match input.trim().parse() {
             Ok(num) => Some(num),
             Err(_) => None,
         },
         Err(_) => None,
     }
+}
+
+fn roll(min: i32, max: i32) -> i32 {
+    // Generate random number between min and max + 1 (exclusive)
+    rand::thread_rng().gen_range(min, max + 1)
 }
 
 pub fn play() {
@@ -65,24 +64,18 @@ pub fn play() {
         // Present options
         println!("(1) Yes (2) No");
       
-        // Get answer
-        let mut answer = String::new();
-        get_user_input(&mut answer);
-
-        // Cast answer to a number
-        let answer: u32 = match answer.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
+        // Get user selection
+        let selection = get_user_selection();
 
         // Determine response action
-        match answer {
-            1 => {
+        match selection {
+            Some(1) => {
                 println!("Awesome!");
                 break;
             },
-            2 => println!("I won't take no for an answer!  Are you ready?"),
-            _ => println!("(I'm sorry, I didn't quite understand that."),
+            Some(2) => println!("I won't take no for an answer!  Are you ready?"),
+            Some(_) => println!("I'm sorry, that's not a valid option.  Please try again."),
+            None => println!("(I'm sorry, I didn't quite understand that."),
         }
     }
 
@@ -99,19 +92,12 @@ pub fn play() {
         // Present options
         println!("(1) Attack (2) Run");
       
-        // Get answer
-        let mut answer = String::new();
-        get_user_input(&mut answer);
-
-        // Cast answer to a number
-        let answer: u32 = match answer.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
+        // Get user selection
+        let selection = get_user_selection();
 
         // Determine response action
-        match answer {
-            1 => {
+        match selection {
+            Some(1) => {
                 // Roll for player attack
                 let player_attack_roll = roll(1, 6);
 
@@ -142,10 +128,8 @@ pub fn play() {
                     println!("You have {} of {} health remaining", player.current_health, player.max_health);
                 }
             },
-            2 => {
-                println!("Bye!");
-                break;
-            },
+            Some(2) => println!("You can't leave!"),
+            Some(_) => println!("I'm sorry, that's not a valid option.  Please try again."),
             _ => println!("(I'm sorry, I didn't quite understand that."),
         }
     }
