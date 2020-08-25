@@ -13,6 +13,29 @@ struct Player {
 }
 
 impl Player {
+    fn new() -> Player {
+        // Present context
+        println!("I'm terribly sorry, but I don't seem to know who you are :(");
+        println!("Let's start with a name.  What should I call you?");
+    
+        // Get name input
+        let mut name = String::new();    
+        utils::get_user_input(&mut name);
+    
+        // Create player
+        let player = Player {
+            name: String::from(name.trim()),
+            max_health: 30,
+            current_health: 30,
+        };
+    
+        // Response text
+        println!("Hello {}!  Pleasure to meet you :)", player.name);
+    
+        // Return the player
+        player
+    }
+
     fn encounter_enemy(&mut self) {
         // Create enemy
         let mut enemy = Enemy {
@@ -71,36 +94,12 @@ impl Player {
     }
 }
 
-// Functions
-fn create_player() -> Player {
-    // Present context
-    println!("I'm terribly sorry, but I don't seem to know who you are :(");
-    println!("Let's start with a name.  What should I call you?");
-
-    // Get name input
-    let mut name = String::new();    
-    utils::get_user_input(&mut name);
-
-    // Create player
-    let player = Player {
-        name: String::from(name.trim()),
-        max_health: 30,
-        current_health: 30,
-    };
-
-    // Response text
-    println!("Hello {}!  Pleasure to meet you :)", player.name);
-
-    // Return the player
-    player
-}
-
 pub fn play() {
     // Present welcome prompt
     utils::prompts::welcome();
 
     // Create the player
-    let mut player = create_player();
+    let mut player = Player::new();
 
     // Present adventure start prompt
     utils::prompts::first_adventure_start();
