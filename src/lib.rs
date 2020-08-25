@@ -38,6 +38,29 @@ fn present_welcome_text() {
     println!("Welcome to Qwestr!");
 }
 
+fn create_player() -> Player {
+    // Present context
+    println!("I'm terribly sorry, but I don't seem to know who you are :(");
+    println!("Let's start with a name.  What should I call you?");
+
+    // Get name input
+    let mut name = String::new();    
+    get_user_input(&mut name);
+
+    // Create player
+    let player = Player {
+        name: String::from(name.trim()),
+        max_health: 30,
+        current_health: 30,
+    };
+
+    // Response text
+    println!("Hello {}!  Pleasure to meet you :)", player.name);
+
+    // Return the player
+    player
+}
+
 fn roll(min: i32, max: i32) -> i32 {
     // Generate random number between min and max + 1 (exclusive)
     rand::thread_rng().gen_range(min, max + 1)
@@ -46,23 +69,9 @@ fn roll(min: i32, max: i32) -> i32 {
 pub fn play() {
     // Present welcome text
     present_welcome_text();
-    
-    println!("I'm terribly sorry, but I don't seem to know who you are :(");
-    println!("Let's start with a name.  What should I call you?");
 
-    // Enter your name
-    let mut name = String::new();    
-    get_user_input(&mut name);
-
-    // Create player
-    let mut player = Player {
-        name: String::from(name.trim()),
-        max_health: 30,
-        current_health: 30,
-    };
-
-    // Response text
-    println!("Hello {}!  Pleasure to meet you :)", player.name);
+    // Create the player
+    let mut player = create_player();
 
     // Question text
     println!("So, are you ready to start your first adventure?");
