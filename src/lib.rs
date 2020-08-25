@@ -72,34 +72,6 @@ impl Player {
 }
 
 // Functions
-fn present_welcome_text() {
-    // Welcome text
-    println!("Welcome to Qwestr!");
-}
-
-fn present_adventure_start_prompt() {
-    // Question text
-    println!("So, are you ready to start your first adventure?");
-    loop {
-        // Present options
-        println!("(1) Yes (2) No");
-      
-        // Get user selection
-        let selection = utils::get_user_selection();
-
-        // Determine response action
-        match selection {
-            Some(1) => {
-                println!("Awesome!");
-                break;
-            },
-            Some(2) => println!("I won't take no for an answer!  Are you ready?"),
-            Some(_) => println!("I'm sorry, that's not a valid option.  Please try again."),
-            None => println!("(I'm sorry, I didn't quite understand that."),
-        }
-    }
-}
-
 fn create_player() -> Player {
     // Present context
     println!("I'm terribly sorry, but I don't seem to know who you are :(");
@@ -124,14 +96,14 @@ fn create_player() -> Player {
 }
 
 pub fn play() {
-    // Present welcome text
-    present_welcome_text();
+    // Present welcome prompt
+    utils::prompts::welcome();
 
     // Create the player
     let mut player = create_player();
 
     // Present adventure start prompt
-    present_adventure_start_prompt();
+    utils::prompts::first_adventure_start();
 
     // Encounter enemy
     player.encounter_enemy();

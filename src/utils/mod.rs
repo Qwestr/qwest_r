@@ -1,6 +1,8 @@
 use std::io;
 use rand::Rng;
 
+pub mod prompts;
+
 pub fn get_user_input(input: &mut String) {
     // Read line of input
     io::stdin()
