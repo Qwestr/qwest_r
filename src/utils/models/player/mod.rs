@@ -38,8 +38,8 @@ impl Player {
         // Create enemy
         let mut enemy = crate::utils::models::enemy::Enemy {
             name: String::from("Animated Skeleton"),
-            max_health: 20,
-            current_health: 20,
+            max_health: 13,
+            current_health: 13,
             min_damage: 1,
             max_damage: 3,
         };
