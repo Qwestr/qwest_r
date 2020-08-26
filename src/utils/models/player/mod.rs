@@ -21,7 +21,7 @@ impl Player {
             max_health: 30,
             current_health: 30,
             weapon: crate::utils::models::weapon::Weapon {
-                name: String::from("training sword"),
+                name: String::from("Training Sword"),
                 min_damage: 1,
                 max_damage: 4,
             }
@@ -37,12 +37,15 @@ impl Player {
     pub fn encounter_enemy(&mut self) {
         // Create enemy
         let mut enemy = crate::utils::models::enemy::Enemy {
+            name: String::from("Animated Skeleton"),
             max_health: 20,
             current_health: 20,
+            min_damage: 1,
+            max_damage: 3,
         };
 
         // Encounter text
-        println!("Uh oh, you encounter an animated skeleton!  He wants to attack you!\n");
+        println!("Uh oh, you've encountered a(n) {}!  they want to attack you!\n", enemy.name);
         println!("What do you want to do?\n");
         loop {
             // Present options
@@ -64,22 +67,22 @@ impl Player {
                     enemy.current_health -= player_attack_roll;
 
                     // Result text
-                    println!("You attack with your cool sword for {} damage!\n", player_attack_roll);
+                    println!("You attack with your {} for {} damage!\n", self.weapon.name, player_attack_roll);
                     if enemy.current_health <= 0 {
-                        println!("You defeated the skeleton!\n");
+                        println!("You've defeated {}!\n", enemy.name);
                         break;
                     } else {
-                        println!("The skeleton has {} of {} health remaining\n", enemy.current_health, enemy.max_health);
+                        println!("{} has {} of {} health remaining\n", enemy.name, enemy.current_health, enemy.max_health);
                     }
 
                     // Roll for enemy attack
-                    let enemy_attack_roll = crate::utils::roll(1, 3);
+                    let enemy_attack_roll = crate::utils::roll(enemy.min_damage, enemy.max_damage);
 
                     // Apply attack damage to the player
                     self.current_health -= enemy_attack_roll;
 
                     // Result text
-                    println!("The skeleton attacks you for {} damage!\n", enemy_attack_roll);
+                    println!("{} attacks you for {} damage!\n", enemy.name, enemy_attack_roll);
                     if self.current_health <= 0 {
                         println!("You were defeated!\n");
                         break;
