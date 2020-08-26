@@ -9,7 +9,9 @@ impl Player {
     pub fn new() -> Player {
         // Present context
         println!("I'm terribly sorry, but I don't seem to know who you are :(\n");
+        crate::utils::wait_one_second();
         println!("Let's start with a name.  What should I call you?\n");
+        crate::utils::wait_one_second();
 
         // Get name input
         let mut name = String::new();    
@@ -29,6 +31,7 @@ impl Player {
 
         // Response text
         println!("Hello {}!  Pleasure to meet you :)\n", player.name);
+        crate::utils::wait_one_second();
 
         // Return the player
         player
@@ -45,6 +48,7 @@ impl Player {
 
         // Result text
         println!("You attack with your {} for {} damage!\n", self.weapon.name, attack_roll);
+        crate::utils::wait_one_second();
 
         // Return attack roll
         attack_roll
@@ -58,10 +62,13 @@ impl Player {
     pub fn encounter_enemy(&mut self, mut enemy: crate::utils::models::enemy::Enemy) {
         // Present context
         println!("Uh oh, you've encountered a(n) {}!  It wants to attack you!\n", enemy.name);
+        crate::utils::wait_one_second();
         println!("What do you want to do?\n");
         loop {
             // Present options
-            println!("(1) Attack (2) Run");
+            crate::utils::wait_one_second();
+            println!("(1) Attack");
+            println!("(2) Run");
             
             // Get user selection
             let selection = crate::utils::get_user_selection();
@@ -77,9 +84,11 @@ impl Player {
 
                     if enemy.current_health <= 0 {
                         println!("You've defeated {}!\n", enemy.name);
+                        crate::utils::wait_one_second();
                         break;
                     } else {
                         println!("{} has {} of {} health remaining\n", enemy.name, enemy.current_health, enemy.max_health);
+                        crate::utils::wait_one_second();
                     }
 
                     // Roll for enemy attack
@@ -90,9 +99,11 @@ impl Player {
 
                     if self.current_health <= 0 {
                         println!("You were defeated!\n");
+                        crate::utils::wait_one_second();
                         break;
                     } else {
                         println!("You have {} of {} health remaining\n", self.current_health, self.max_health);
+                        crate::utils::wait_one_second();
                     }
                 },
                 Some(2) => println!("You can't leave!\n"),
@@ -105,11 +116,16 @@ impl Player {
     pub fn visit_shop(&self, shop: crate::utils::models::shop::Shop) {
         // Present context
         println!("Welcome to {}!\n", shop.name);
+        crate::utils::wait_one_second();
         println!("What do you want to do?\n");
+        crate::utils::wait_one_second();
 
         loop {
             // Present options
-            println!("(1) Buy (2) Sell (3) Leave");
+            crate::utils::wait_one_second();
+            println!("(1) Buy");
+            println!("(2) Sell");
+            println!("(3) Leave");
             
             // Get user selection
             let selection = crate::utils::get_user_selection();
@@ -119,6 +135,7 @@ impl Player {
                 Some(1) => {
                     // Present question
                     println!("What're you buyin'?\n");
+                    crate::utils::wait_one_second();
 
                     // Present shop items
                     shop.list_items();
@@ -126,6 +143,7 @@ impl Player {
                 Some(2) => {
                     // Present question
                     println!("What're you sellin'?\n");
+                    crate::utils::wait_one_second();
                 },
                 Some(3) => println!("You can't leave!\n"),
                 Some(_) => println!("I'm sorry, that's not a valid option.  Please try again.\n"),

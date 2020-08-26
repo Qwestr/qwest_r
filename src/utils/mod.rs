@@ -1,14 +1,20 @@
+use std::{thread, time};
 use std::io;
 use rand::Rng;
 
 pub mod models;
 pub mod prompts;
 
+pub fn wait_one_second() {
+    // Sleep for the 1000 milliseconds
+    thread::sleep(time::Duration::from_millis(1000));
+}
+
 pub fn get_user_input(input: &mut String) {
     // Read line of input
     io::stdin()
         .read_line(input)
-        .expect("I'm sorry, I didn't quite understand that.");
+        .expect("Something went wrong...");
 }
 
 pub fn get_user_selection() -> Option<i32> {
