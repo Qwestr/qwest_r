@@ -12,8 +12,8 @@ pub struct Player {
 impl Player {
   pub fn new() -> Player {
       // Present context
-      println!("I'm terribly sorry, but I don't seem to know who you are :(");
-      println!("Let's start with a name.  What should I call you?");
+      println!("I'm terribly sorry, but I don't seem to know who you are :(\n");
+      println!("Let's start with a name.  What should I call you?\n");
   
       // Get name input
       let mut name = String::new();    
@@ -27,7 +27,7 @@ impl Player {
       };
   
       // Response text
-      println!("Hello {}!  Pleasure to meet you :)", player.name);
+      println!("Hello {}!  Pleasure to meet you :)\n", player.name);
   
       // Return the player
       player
@@ -41,8 +41,8 @@ impl Player {
       };
   
       // Encounter text
-      println!("Uh oh, you encounter an animated skeleton!  He wants to attack you!");
-      println!("What do you want to do?");
+      println!("Uh oh, you encounter an animated skeleton!  He wants to attack you!\n");
+      println!("What do you want to do?\n");
       loop {
           // Present options
           println!("(1) Attack (2) Run");
@@ -60,12 +60,12 @@ impl Player {
                   enemy.current_health -= player_attack_roll;
   
                   // Result text
-                  println!("You attack with your cool sword for {} damage!", player_attack_roll);
+                  println!("You attack with your cool sword for {} damage!\n", player_attack_roll);
                   if enemy.current_health <= 0 {
-                      println!("You defeated the skeleton!");
+                      println!("You defeated the skeleton!\n");
                       break;
                   } else {
-                      println!("The skeleton has {} of {} health remaining", enemy.current_health, enemy.max_health);
+                      println!("The skeleton has {} of {} health remaining\n", enemy.current_health, enemy.max_health);
                   }
   
                   // Roll for enemy attack
@@ -75,17 +75,17 @@ impl Player {
                   self.current_health -= enemy_attack_roll;
   
                   // Result text
-                  println!("The skeleton attacks you for {} damage!", enemy_attack_roll);
+                  println!("The skeleton attacks you for {} damage!\n", enemy_attack_roll);
                   if self.current_health <= 0 {
-                      println!("You were defeated!");
+                      println!("You were defeated!\n");
                       break;
                   } else {
-                      println!("You have {} of {} health remaining", self.current_health, self.max_health);
+                      println!("You have {} of {} health remaining\n", self.current_health, self.max_health);
                   }
               },
-              Some(2) => println!("You can't leave!"),
-              Some(_) => println!("I'm sorry, that's not a valid option.  Please try again."),
-              _ => println!("(I'm sorry, I didn't quite understand that."),
+              Some(2) => println!("You can't leave!\n"),
+              Some(_) => println!("I'm sorry, that's not a valid option.  Please try again.\n"),
+              _ => println!("(I'm sorry, I didn't quite understand that.\n"),
           }
       }
   }
