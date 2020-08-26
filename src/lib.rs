@@ -21,4 +21,12 @@ pub fn play() {
 
     // Encounter the enemy
     player.encounter_enemy(enemy);
+
+    // Create the first enemy
+    let shop = utils::models::shop::Shop {
+        name: String::from("Big Al's Weapons Shop"),
+    };
+
+    // Visit the shop
+    player.visit_shop(shop);
 }

@@ -56,7 +56,7 @@ impl Player {
     }
 
     pub fn encounter_enemy(&mut self, mut enemy: crate::utils::models::enemy::Enemy) {
-        // Encounter text
+        // Present context
         println!("Uh oh, you've encountered a(n) {}!  It wants to attack you!\n", enemy.name);
         println!("What do you want to do?\n");
         loop {
@@ -96,6 +96,35 @@ impl Player {
                     }
                 },
                 Some(2) => println!("You can't leave!\n"),
+                Some(_) => println!("I'm sorry, that's not a valid option.  Please try again.\n"),
+                _ => println!("(I'm sorry, I didn't quite understand that.\n"),
+            }
+        }
+    }
+
+    pub fn visit_shop(&self, shop: crate::utils::models::shop::Shop) {
+        // Present context
+        println!("Welcome to {}!\n", shop.name);
+        println!("What do you want to do?\n");
+
+        loop {
+            // Present options
+            println!("(1) Buy (2) Sell (3) Leave");
+            
+            // Get user selection
+            let selection = crate::utils::get_user_selection();
+
+            // Determine response action
+            match selection {
+                Some(1) => {
+                    // Present question
+                    println!("What're you buyin'?\n");
+                },
+                Some(2) => {
+                    // Present question
+                    println!("What're you sellin'?\n");
+                },
+                Some(3) => println!("You can't leave!\n"),
                 Some(_) => println!("I'm sorry, that's not a valid option.  Please try again.\n"),
                 _ => println!("(I'm sorry, I didn't quite understand that.\n"),
             }
