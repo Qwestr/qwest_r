@@ -119,6 +119,9 @@ impl Player {
                 Some(1) => {
                     // Present question
                     println!("What're you buyin'?\n");
+
+                    // Present shop items
+                    shop.list_items();
                 },
                 Some(2) => {
                     // Present question
