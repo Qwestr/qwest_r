@@ -57,7 +57,7 @@ impl Player {
 
     pub fn encounter_enemy(&mut self, mut enemy: crate::utils::models::enemy::Enemy) {
         // Encounter text
-        println!("Uh oh, you've encountered a(n) {}!  they want to attack you!\n", enemy.name);
+        println!("Uh oh, you've encountered a(n) {}!  It wants to attack you!\n", enemy.name);
         println!("What do you want to do?\n");
         loop {
             // Present options
