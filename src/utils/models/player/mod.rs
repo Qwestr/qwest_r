@@ -2,6 +2,7 @@ pub struct Player {
     name: String,
     max_health: i32,
     current_health: i32,
+    weapon: crate::utils::models::weapon::Weapon,
   }
   
 impl Player {
@@ -19,6 +20,11 @@ impl Player {
             name: String::from(name.trim()),
             max_health: 30,
             current_health: 30,
+            weapon: crate::utils::models::weapon::Weapon {
+                name: String::from("training sword"),
+                min_damage: 1,
+                max_damage: 4,
+            }
         };
 
         // Response text
@@ -49,7 +55,10 @@ impl Player {
             match selection {
                 Some(1) => {
                     // Roll for player attack
-                    let player_attack_roll = crate::utils::roll(1, 6);
+                    let player_attack_roll = crate::utils::roll(
+                        self.weapon.min_damage,
+                        self.weapon.max_damage
+                    );
 
                     // Apply attack damage to the enemy
                     enemy.current_health -= player_attack_roll;
