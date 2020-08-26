@@ -33,17 +33,29 @@ impl Player {
         // Return the player
         player
     }
+}
 
-    pub fn encounter_enemy(&mut self) {
-        // Create enemy
-        let mut enemy = crate::utils::models::enemy::Enemy {
-            name: String::from("Animated Skeleton"),
-            max_health: 13,
-            current_health: 13,
-            min_damage: 1,
-            max_damage: 3,
-        };
+impl Player {
+    fn attack(&self) -> i32 {
+        // Roll for attack
+        let attack_roll = crate::utils::roll(
+            self.weapon.min_damage,
+            self.weapon.max_damage
+        );
 
+        // Result text
+        println!("You attack with your {} for {} damage!\n", self.weapon.name, attack_roll);
+
+        // Return attack roll
+        attack_roll
+    }
+
+    fn take_damage(&mut self, damage: i32) {
+        // Apply damage
+        self.current_health -= damage;
+    }
+
+    pub fn encounter_enemy(&mut self, mut enemy: crate::utils::models::enemy::Enemy) {
         // Encounter text
         println!("Uh oh, you've encountered a(n) {}!  they want to attack you!\n", enemy.name);
         println!("What do you want to do?\n");
@@ -58,16 +70,11 @@ impl Player {
             match selection {
                 Some(1) => {
                     // Roll for player attack
-                    let player_attack_roll = crate::utils::roll(
-                        self.weapon.min_damage,
-                        self.weapon.max_damage
-                    );
+                    let player_attack_roll = self.attack();
 
-                    // Apply attack damage to the enemy
-                    enemy.current_health -= player_attack_roll;
+                    // Apply attack to the enemy
+                    enemy.take_damage(player_attack_roll);
 
-                    // Result text
-                    println!("You attack with your {} for {} damage!\n", self.weapon.name, player_attack_roll);
                     if enemy.current_health <= 0 {
                         println!("You've defeated {}!\n", enemy.name);
                         break;
@@ -76,13 +83,11 @@ impl Player {
                     }
 
                     // Roll for enemy attack
-                    let enemy_attack_roll = crate::utils::roll(enemy.min_damage, enemy.max_damage);
+                    let enemy_attack_roll = enemy.attack();
 
                     // Apply attack damage to the player
-                    self.current_health -= enemy_attack_roll;
+                    self.take_damage(enemy_attack_roll);
 
-                    // Result text
-                    println!("{} attacks you for {} damage!\n", enemy.name, enemy_attack_roll);
                     if self.current_health <= 0 {
                         println!("You were defeated!\n");
                         break;

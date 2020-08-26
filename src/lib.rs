@@ -10,6 +10,15 @@ pub fn play() {
     // Present adventure start prompt
     utils::prompts::first_adventure_start();
 
-    // Encounter enemy
-    player.encounter_enemy();
+    // Create the first enemy
+    let enemy = utils::models::enemy::Enemy {
+        name: String::from("Animated Skeleton"),
+        max_health: 13,
+        current_health: 13,
+        min_damage: 1,
+        max_damage: 3,
+    };
+
+    // Encounter the enemy
+    player.encounter_enemy(enemy);
 }
