@@ -5,7 +5,7 @@ pub fn play() {
     utils::prompts::welcome();
 
     // Create the player
-    let mut player = utils::models::Player::new();
+    let mut player = utils::models::player::Player::new();
 
     // Present adventure start prompt
     utils::prompts::first_adventure_start();
