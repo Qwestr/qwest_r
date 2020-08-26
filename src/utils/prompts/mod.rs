@@ -1,7 +1,7 @@
 pub fn welcome() {
     // Welcome text
     println!("\nWelcome to Qwestr!\n");
-    crate::utils::wait_one_second();
+    crate::utils::wait_about_one_second();
 }
 
 pub fn first_adventure_start() {
@@ -9,7 +9,7 @@ pub fn first_adventure_start() {
     println!("So, are you ready to start your first adventure?\n");
     loop {
         // Present options
-        crate::utils::wait_one_second();
+        crate::utils::wait_about_one_second();
         println!("(1) Yes");
         println!("(2) No");
 
@@ -20,7 +20,7 @@ pub fn first_adventure_start() {
         match selection {
             Some(1) => {
                 println!("Awesome!\n");
-                crate::utils::wait_one_second();
+                crate::utils::wait_about_one_second();
                 break;
             },
             Some(2) => println!("I won't take no for an answer!  Are you ready?\n"),

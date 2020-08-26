@@ -5,9 +5,9 @@ use rand::Rng;
 pub mod models;
 pub mod prompts;
 
-pub fn wait_one_second() {
-    // Sleep for the 1000 milliseconds
-    thread::sleep(time::Duration::from_millis(1000));
+pub fn wait_about_one_second() {
+    // Sleep for a random amount of time between 700 and 1700 milliseconds
+    thread::sleep(time::Duration::from_millis(rand::thread_rng().gen_range(700, 1700)));
 }
 
 pub fn get_user_input(input: &mut String) {

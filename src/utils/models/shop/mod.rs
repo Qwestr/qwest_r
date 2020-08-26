@@ -5,7 +5,7 @@ pub struct Shop {
 impl Shop {
     pub fn list_items(&self) {
         // List shop items
-        crate::utils::wait_one_second();
+        crate::utils::wait_about_one_second();
         println!("(1) New Sword: 10 gold");
         println!("(2) Health Potion (3 available): 5 gold");
         println!("(3) Cancel");

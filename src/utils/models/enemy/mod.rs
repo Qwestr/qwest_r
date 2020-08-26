@@ -16,7 +16,7 @@ impl Enemy {
 
         // Result text
         println!("{} attacks you for {} damage!\n", self.name, attack_roll);
-        crate::utils::wait_one_second();
+        crate::utils::wait_about_one_second();
 
         // Return attack roll
         attack_roll
