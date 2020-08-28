@@ -2,6 +2,9 @@ pub struct Player {
     name: String,
     max_health: i32,
     current_health: i32,
+    coins: i32,
+    experience_points: i32,
+    // level: i32,
     weapon: crate::utils::models::weapon::Weapon,
   }
   
@@ -22,6 +25,9 @@ impl Player {
             name: String::from(name.trim()),
             max_health: 30,
             current_health: 30,
+            coins: 0,
+            experience_points: 0,
+            // level: 1,
             weapon: crate::utils::models::weapon::Weapon {
                 name: String::from("Training Sword"),
                 min_damage: 1,
@@ -83,8 +89,11 @@ impl Player {
                     enemy.take_damage(player_attack_roll);
 
                     if enemy.current_health <= 0 {
+                        // Present victory text
                         println!("You've defeated {}!\n", enemy.name);
                         crate::utils::wait_about_one_second();
+                        // Collect rewards
+                        self.collect_rewards();
                         break;
                     } else {
                         println!("{} has {} of {} health remaining\n", enemy.name, enemy.current_health, enemy.max_health);
@@ -111,6 +120,28 @@ impl Player {
                 _ => println!("(I'm sorry, I didn't quite understand that.\n"),
             }
         }
+    }
+
+    pub fn collect_rewards(&mut self) {
+        // TODO: calculate experience earned based on amount/ type/ level
+        // of enemies defeated
+        let xp_earned = 100;
+
+        // Update Player experience points
+        self.experience_points += xp_earned;
+
+        println!("You earned {} experience!\n", xp_earned);
+        crate::utils::wait_about_one_second();
+
+        // TODO: calculate coins earned based on amount/ type/ level
+        // of enemies defeated
+        let coins_earned = 100;
+
+        // Update Player coins
+        self.coins += coins_earned;
+
+        println!("You earned {} coins!\n", coins_earned);
+        crate::utils::wait_about_one_second();
     }
 
     pub fn visit_shop(&self, shop: crate::utils::models::shop::Shop) {
