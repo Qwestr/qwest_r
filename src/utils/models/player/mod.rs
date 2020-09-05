@@ -176,7 +176,11 @@ impl Player {
                     println!("What're you sellin'?\n");
                     crate::utils::wait_about_one_second();
                 },
-                Some(3) => println!("You can't leave!\n"),
+                Some(3) => {
+                    // Present exit text
+                    println!("Goodbye!\n");
+                    break;
+                },
                 Some(_) => println!("I'm sorry, that's not a valid option.  Please try again.\n"),
                 _ => println!("(I'm sorry, I didn't quite understand that.\n"),
             }
