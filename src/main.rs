@@ -12,6 +12,7 @@ const LIMIT_FPS: i32 = 20;
 // Define Tcod struct
 struct Tcod {
     root: console::Root,
+    con: console::Offscreen,
 }
 
 // Define methods
@@ -54,7 +55,9 @@ fn main() {
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Qwestr")
         .init();
-    let mut tcod = Tcod { root };
+    let con = console::Offscreen::new(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    let mut tcod = Tcod { root, con };
 
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
@@ -66,11 +69,21 @@ fn main() {
     // Setup game loop
     while !tcod.root.window_closed() {
         // Set draw colour
-        tcod.root.set_default_foreground(colors::WHITE);
+        tcod.con.set_default_foreground(colors::WHITE);
         // Clear previous frame
-        tcod.root.clear();
+        tcod.con.clear();
         // Draw the @ character
-        tcod.root.put_char(player_x, player_y, '@', console::BackgroundFlag::None);
+        tcod.con.put_char(player_x, player_y, '@', console::BackgroundFlag::None);
+        // Blit the contents of "con" to the root console
+        console::blit(
+            &tcod.con,
+            (0, 0),
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            &mut tcod.root,
+            (0, 0),
+            1.0,
+            1.0,
+        );
         // Draw everything on the window at once
         tcod.root.flush();
         // Handle keys and exit game if needed
