@@ -39,11 +39,13 @@ impl Object {
         Object { x, y, char, color }
     }
 
-    // Move by the given amount
-    pub fn move_by(&mut self, dx: i32, dy: i32) {
-        self.x += dx;
-        self.y += dy;
-    }
+    // Move by the given amount, if the destination is not blocked
+    pub fn move_by(&mut self, dx: i32, dy: i32, game: &Game) {  
+        if !game.map[(self.x + dx) as usize][(self.y + dy) as usize].blocked {  
+            self.x += dx;  
+            self.y += dy;
+        }
+}
 
     // Set the color and then draw the character that represents this object at its position
     pub fn draw(&self, con: &mut dyn Console) {
@@ -90,7 +92,7 @@ struct Tcod {
 }
 
 // Define methods
-fn handle_keys(tcod: &mut Tcod, player: &mut Object) -> bool {
+fn handle_keys(tcod: &mut Tcod, game: &Game, player: &mut Object) -> bool {
     // Import modules
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
@@ -101,10 +103,10 @@ fn handle_keys(tcod: &mut Tcod, player: &mut Object) -> bool {
     // Determine which key was pressed
     match key {
         // Movement keys
-        Key { code: Up, .. } => player.move_by(0, -1),
-        Key { code: Down, .. } => player.move_by(0, 1),
-        Key { code: Left, .. } => player.move_by(-1, 0),
-        Key { code: Right, .. } => player.move_by(1, 0),
+        Key { code: Up, .. } => player.move_by(0, -1, game),
+        Key { code: Down, .. } => player.move_by(0, 1, game),
+        Key { code: Left, .. } => player.move_by(-1, 0, game),
+        Key { code: Right, .. } => player.move_by(1, 0, game),
         Key {
             code: Enter,
             alt: true,
@@ -206,7 +208,7 @@ fn main() {
         
         // Handle keys/ player movement and exit game if needed
         let player = &mut objects[0];
-        let exit = handle_keys(&mut tcod, player);
+        let exit = handle_keys(&mut tcod, &game, player);
         if exit {
             break;
         }
