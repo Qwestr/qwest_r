@@ -217,11 +217,11 @@ fn main() {
         map: make_map(),
     };
 
-    // Create object representing the player
-    let player = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', colors::WHITE);
+    // Create the player
+    let player = Object::new(25, 23, '@', colors::WHITE);
 
     // Create an NPC
-    let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', colors::YELLOW);
+    let npc = Object::new(55, 23, '@', colors::YELLOW);
 
     // Create a list of objects
     let mut objects = [player, npc];
