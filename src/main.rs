@@ -54,6 +54,26 @@ impl Object {
     }
 }
 
+// A rectangle on the map, used to characterise a room.
+#[derive(Clone, Copy, Debug)]
+struct Rect {
+    x1: i32,
+    y1: i32,
+    x2: i32,
+    y2: i32,
+}
+
+impl Rect {
+    pub fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
+        Rect {
+            x1: x,
+            y1: y,
+            x2: x + w,
+            y2: y + h,
+        }
+    }
+}
+
 // A tile of the map and its properties
 #[derive(Clone, Copy, Debug)]
 struct Tile {
