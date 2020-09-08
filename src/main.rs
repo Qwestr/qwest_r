@@ -1,3 +1,4 @@
+use std::cmp;
 use tcod::colors;
 use tcod::console;
 use tcod::console::Console;
@@ -151,6 +152,13 @@ fn create_room(room: Rect, map: &mut Map) {
         for y in (room.y1 + 1)..room.y2 {
             map[x as usize][y as usize] = Tile::empty();
         }
+    }
+}
+
+fn create_h_tunnel(x1: i32, x2: i32, y: i32, map: &mut Map) {
+    // Horizontal tunnel. `min()` and `max()` are used in case `x1 > x2`
+    for x in cmp::min(x1, x2)..(cmp::max(x1, x2) + 1) {
+        map[x as usize][y as usize] = Tile::empty();
     }
 }
 
