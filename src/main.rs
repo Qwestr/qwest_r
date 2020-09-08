@@ -157,6 +157,15 @@ fn make_map() -> Map {
     map
 }
 
+fn create_room(room: Rect, map: &mut Map) {
+    // Go through the tiles in the rectangle and make them passable
+    for x in (room.x1 + 1)..room.x2 {
+        for y in (room.y1 + 1)..room.y2 {
+            map[x as usize][y as usize] = Tile::empty();
+        }
+    }
+}
+
 fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object]) {
     // Draw all objects in the list
     for object in objects {
