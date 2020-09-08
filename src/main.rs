@@ -2,8 +2,31 @@ use tcod::colors;
 use tcod::console;
 use tcod::console::Console;
 
+// Actual size of the window
+const SCREEN_WIDTH: i32 = 80;
+const SCREEN_HEIGHT: i32 = 50;
+
+// Size of the map
+const MAP_WIDTH: i32 = 80;
+const MAP_HEIGHT: i32 = 45;
+
+const COLOR_DARK_WALL: colors::Color = colors::Color {
+    r: 0,
+    g: 0,
+    b: 100
+};
+const COLOR_DARK_GROUND: colors::Color = colors::Color {
+    r: 50,
+    g: 50,
+    b: 150,
+};
+
+// 20 frames-per-second maximum
+const LIMIT_FPS: i32 = 20;
+
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
+#[derive(Debug)]
 struct Object {
     x: i32,
     y: i32,
@@ -29,14 +52,38 @@ impl Object {
     }
 }
 
-// Actual size of the window
-const SCREEN_WIDTH: i32 = 80;
-const SCREEN_HEIGHT: i32 = 50;
+// A tile of the map and its properties
+#[derive(Clone, Copy, Debug)]
+struct Tile {
+    blocked: bool,
+    block_sight: bool,
+}
 
-// 20 frames-per-second maximum
-const LIMIT_FPS: i32 = 20;
+impl Tile {
+    pub fn empty() -> Self {
+        Tile {
+            blocked: false,
+            block_sight: false,
+        }
+    }
 
-// Define Tcod struct
+    pub fn wall() -> Self {
+        Tile {
+            blocked: true,
+            block_sight: true,
+        }
+    }
+}
+
+// Map type (2D array of Tiles)
+type Map = Vec<Vec<Tile>>;
+
+// Game struct
+struct Game {
+    map: Map,
+}
+
+// Tcod struct
 struct Tcod {
     root: console::Root,
     con: console::Offscreen,
@@ -47,8 +94,10 @@ fn handle_keys(tcod: &mut Tcod, player: &mut Object) -> bool {
     // Import modules
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
+    
     // Wait for keypress
     let key = tcod.root.wait_for_keypress(true);
+    
     // Determine which key was pressed
     match key {
         // Movement keys
@@ -74,6 +123,48 @@ fn handle_keys(tcod: &mut Tcod, player: &mut Object) -> bool {
     false
 }
 
+fn make_map() -> Map {
+    // Fill map with "unblocked" tiles
+    let mut map = vec![vec![Tile::empty(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
+    
+    // place two pillars to test the map
+    map[30][22] = Tile::wall();
+    map[50][22] = Tile::wall();
+
+    // Return the map
+    map
+}
+
+fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object]) {
+    // Draw all objects in the list
+    for object in objects {
+        object.draw(&mut tcod.con);
+    }
+    
+    // Go through all tiles, and set their background color
+    for y in 0..MAP_HEIGHT {
+        for x in 0..MAP_WIDTH {
+            let wall = game.map[x as usize][y as usize].block_sight;
+            if wall {
+                tcod.con.set_char_background(x, y, COLOR_DARK_WALL, console::BackgroundFlag::Set);
+            } else {
+                tcod.con.set_char_background(x, y, COLOR_DARK_GROUND, console::BackgroundFlag::Set);
+            }
+        }
+    }
+    
+    // Blit the contents of "con" to the root console
+    console::blit(
+        &tcod.con,
+        (0, 0),
+        (MAP_WIDTH, MAP_HEIGHT),
+        &mut tcod.root,
+        (0, 0),
+        1.0,
+        1.0,
+    );
+}
+
 fn main() {
     // Define tcod implementation
     let root = console::Root::initializer()
@@ -82,12 +173,16 @@ fn main() {
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Qwestr")
         .init();
-    let con = console::Offscreen::new(SCREEN_WIDTH, SCREEN_HEIGHT);
-
+    let con = console::Offscreen::new(MAP_WIDTH, MAP_HEIGHT);
     let mut tcod = Tcod { root, con };
-
+    
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
+
+    // Define game
+    let game = Game {
+        map: make_map(),
+    };
 
     // Create object representing the player
     let player = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', colors::WHITE);
@@ -102,23 +197,14 @@ fn main() {
     while !tcod.root.window_closed() {
         // Clear previous frame
         tcod.con.clear();
-        // Draw all objects
-        for object in &objects {
-            object.draw(&mut tcod.con);
-        }
-        // Blit the contents of "con" to the root console
-        console::blit(
-            &tcod.con,
-            (0, 0),
-            (SCREEN_WIDTH, SCREEN_HEIGHT),
-            &mut tcod.root,
-            (0, 0),
-            1.0,
-            1.0,
-        );
+
+        // Render the screen
+        render_all(&mut tcod, &game, &objects);
+        
         // Draw everything on the window at once
         tcod.root.flush();
-        // Handle keys and exit game if needed
+        
+        // Handle keys/ player movement and exit game if needed
         let player = &mut objects[0];
         let exit = handle_keys(&mut tcod, player);
         if exit {
