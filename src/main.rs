@@ -156,8 +156,17 @@ fn create_room(room: Rect, map: &mut Map) {
 }
 
 fn create_h_tunnel(x1: i32, x2: i32, y: i32, map: &mut Map) {
-    // Horizontal tunnel. `min()` and `max()` are used in case `x1 > x2`
+    // Horizontal tunnel
+    // `min()` and `max()` are used in case `x1 > x2`
     for x in cmp::min(x1, x2)..(cmp::max(x1, x2) + 1) {
+        map[x as usize][y as usize] = Tile::empty();
+    }
+}
+
+fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
+    // Vertical tunnel
+    // `min()` and `max()` are used in case `x1 > x2`
+    for y in cmp::min(y1, y2)..(cmp::max(y1, y2) + 1) {
         map[x as usize][y as usize] = Tile::empty();
     }
 }
