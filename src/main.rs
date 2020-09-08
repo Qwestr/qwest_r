@@ -145,18 +145,6 @@ fn handle_keys(tcod: &mut Tcod, game: &Game, player: &mut Object) -> bool {
     false
 }
 
-fn make_map() -> Map {
-    // Fill map with "unblocked" tiles
-    let mut map = vec![vec![Tile::empty(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
-    
-    // place two pillars to test the map
-    map[30][22] = Tile::wall();
-    map[50][22] = Tile::wall();
-
-    // Return the map
-    map
-}
-
 fn create_room(room: Rect, map: &mut Map) {
     // Go through the tiles in the rectangle and make them passable
     for x in (room.x1 + 1)..room.x2 {
@@ -164,6 +152,20 @@ fn create_room(room: Rect, map: &mut Map) {
             map[x as usize][y as usize] = Tile::empty();
         }
     }
+}
+
+fn make_map() -> Map {
+    // Fill map with "blocked" tiles
+    let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
+
+    // Create two rooms
+    let room1 = Rect::new(20, 15, 10, 15);
+    let room2 = Rect::new(50, 15, 10, 15);
+    create_room(room1, &mut map);
+    create_room(room2, &mut map);
+
+    // Return the map
+    map
 }
 
 fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object]) {
