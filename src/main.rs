@@ -11,6 +11,12 @@ const SCREEN_HEIGHT: i32 = 50;
 const MAP_WIDTH: i32 = 80;
 const MAP_HEIGHT: i32 = 45;
 
+// Room parameters for dungeon generator
+const ROOM_MAX_SIZE: i32 = 10;
+const ROOM_MIN_SIZE: i32 = 6;
+const MAX_ROOMS: i32 = 30;
+
+// Wall/ ground colors
 const COLOR_DARK_WALL: colors::Color = colors::Color {
     r: 0,
     g: 0,
@@ -75,7 +81,7 @@ impl Rect {
     }
 
     pub fn center(&self) -> (i32, i32) {
-        // Returns tuple containing (x, y) coords of Rect
+        // Returns tuple containing (x, y) coords of Rect center
         let center_x = (self.x1 + self.x2) / 2;
         let center_y = (self.y1 + self.y2) / 2;
         (center_x, center_y)
