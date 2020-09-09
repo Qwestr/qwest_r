@@ -181,6 +181,9 @@ fn make_map() -> Map {
     create_room(room1, &mut map);
     create_room(room2, &mut map);
 
+    // Create a tunnel between the first two rooms
+    create_h_tunnel(30, 50, 23, &mut map);
+
     // Return the map
     map
 }
