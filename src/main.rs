@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::cmp;
 use tcod::colors;
 use tcod::console;
@@ -192,18 +193,63 @@ fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
     }
 }
 
-fn make_map() -> Map {
+fn make_map(player: &mut Object) -> Map {
     // Fill map with "blocked" tiles
     let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
 
-    // Create two rooms
-    let room1 = Rect::new(20, 15, 10, 15);
-    let room2 = Rect::new(50, 15, 10, 15);
-    create_room(room1, &mut map);
-    create_room(room2, &mut map);
+    // Create rooms vector
+    let mut rooms = vec![];
 
-    // Create a tunnel between the first two rooms
-    create_h_tunnel(30, 50, 23, &mut map);
+    // Generate rooms
+    for _ in 0..MAX_ROOMS {
+        // Generate random width and height for new room
+        let w = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+        let h = rand::thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+        
+        // Generate random position without going out of the boundaries of the map
+        let x = rand::thread_rng().gen_range(0, MAP_WIDTH - w);
+        let y = rand::thread_rng().gen_range(0, MAP_HEIGHT - h);
+
+        // Create new room
+        let new_room = Rect::new(x, y, w, h);
+
+        // Run through the other rooms and see if they intersect with this one
+        let failed = rooms.iter().any(|other_room| new_room.intersects_with(other_room));
+
+        if !failed {
+            // This means there are no intersections, so this room is valid
+            // "carve" it to the map's wall tiles
+            create_room(new_room, &mut map);
+
+            // Center coordinates of the new room, will be useful later
+            let (new_x, new_y) = new_room.center();
+
+            if rooms.is_empty() {
+                // This is the first room, where the player starts at
+                player.x = new_x;
+                player.y = new_y;
+            }  else {
+                // All rooms after the first:
+                // connect it to the previous room with a tunnel
+                // center coordinates of the previous room
+                let (prev_x, prev_y) = rooms[rooms.len() - 1].center();
+            
+                // Toss a coin (random bool value -- either true or false)
+                if rand::random() {
+                    // First move horizontally, then vertically
+                    create_h_tunnel(prev_x, new_x, prev_y, &mut map);
+                    create_v_tunnel(prev_y, new_y, new_x, &mut map);
+                } else {
+                    // First move vertically, then horizontally
+                    create_v_tunnel(prev_y, new_y, prev_x, &mut map);
+                    create_h_tunnel(prev_x, new_x, new_y, &mut map);
+                }
+            }
+
+            // Finally, append the new room to the list
+            rooms.push(new_room);
+        }
+    }
 
     // Return the map
     map
@@ -253,19 +299,20 @@ fn main() {
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
 
-    // Define game
-    let game = Game {
-        map: make_map(),
-    };
-
     // Create the player
-    let player = Object::new(25, 23, '@', colors::WHITE);
+    let player = Object::new(0, 0, '@', colors::WHITE);
 
     // Create an NPC
-    let npc = Object::new(55, 23, '@', colors::YELLOW);
+    // let npc = Object::new(55, 23, '@', colors::YELLOW);
 
     // Create a list of objects
-    let mut objects = [player, npc];
+    // let mut objects = [player, npc];
+    let mut objects = [player];
+
+    // Define game
+    let game = Game {
+        map: make_map(&mut objects[0]),
+    };
 
     // Setup game loop
     while !tcod.root.window_closed() {
