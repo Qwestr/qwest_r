@@ -286,12 +286,7 @@ fn make_map(player: &mut Object) -> Map {
 }
 
 fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: bool) {
-    // Draw all objects in the list
-    for object in objects {
-        object.draw(&mut tcod.con);
-    }
-
-    // recompute FOV if needed (eg. the player moved )
+    // Recompute FOV if needed (eg. the player moved )
     if fov_recompute {
         let player = &objects[0];
         tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
@@ -311,6 +306,13 @@ fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: b
                 (true, false) => COLOR_LIGHT_GROUND,
             };
             tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
+        }
+    }
+
+    // Draw all objects in the list (if it's in FOV)
+    for object in objects {
+        if tcod.fov.is_in_fov(object.x, object.y) {
+            object.draw(&mut tcod.con);
         }
     }
     
