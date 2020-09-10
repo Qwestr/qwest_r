@@ -268,6 +268,7 @@ struct Game {
 struct Tcod {
     root: Root,
     con: Offscreen,
+    panel: Offscreen,
     fov: FovMap,
 }
 
@@ -519,6 +520,32 @@ fn monster_death(monster: &mut Object) {
     monster.name = format!("remains of {}", monster.name);
 }
 
+fn render_bar(
+    panel: &mut Offscreen,
+    x: i32,
+    y: i32,
+    total_width: i32,
+    name: &str,
+    value: i32,
+    maximum: i32,
+    bar_color: Color,
+    back_color: Color,
+) {
+    // Render a bar (HP, experience, etc).
+    // First calculate the width of the bar
+    let bar_width = (value as f32 / maximum as f32 * total_width as f32) as i32;
+
+    // Render the background first
+    panel.set_default_background(back_color);
+    panel.rect(x, y, total_width, 1, false, BackgroundFlag::Screen);
+
+    // Now render the bar on top
+    panel.set_default_background(bar_color);
+    if bar_width > 0 {
+        panel.rect(x, y, bar_width, 1, false, BackgroundFlag::Screen);
+    }
+}
+
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
     // Recompute FOV if needed (eg. the player moved )
     if fov_recompute {
@@ -652,7 +679,8 @@ fn main() {
         .init();
     let mut tcod = Tcod {
         root,
-        con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),  
+        con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),
+        panel: Offscreen::new(SCREEN_WIDTH, PANEL_HEIGHT),  
         fov: FovMap::new(MAP_WIDTH, MAP_HEIGHT),
     };
     
