@@ -1,8 +1,22 @@
 use rand::Rng;
 use std::cmp;
-use tcod::colors;
-use tcod::console;
-use tcod::console::Console;
+use tcod::colors::{
+    Color,
+    WHITE
+};
+use tcod::console::{
+    BackgroundFlag,
+    blit,
+    Console,
+    FontLayout,
+    FontType,
+    Offscreen,
+    Root
+};
+use tcod::map::{
+    FovAlgorithm,
+    Map as FovMap
+}; 
 
 // Actual size of the window
 const SCREEN_WIDTH: i32 = 80;
@@ -17,16 +31,31 @@ const ROOM_MAX_SIZE: i32 = 10;
 const ROOM_MIN_SIZE: i32 = 6;
 const MAX_ROOMS: i32 = 30;
 
+// Default FOV algorithm and other values
+const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
+const FOV_LIGHT_WALLS: bool = true; 
+const TORCH_RADIUS: i32 = 10;
+
 // Wall/ ground colors
-const COLOR_DARK_WALL: colors::Color = colors::Color {
+const COLOR_DARK_WALL: Color = Color {
     r: 0,
     g: 0,
     b: 100
 };
-const COLOR_DARK_GROUND: colors::Color = colors::Color {
+const COLOR_LIGHT_WALL: Color = Color {
+    r: 130,
+    g: 110,
+    b: 50,
+};
+const COLOR_DARK_GROUND: Color = Color {
     r: 50,
     g: 50,
     b: 150,
+};
+const COLOR_LIGHT_GROUND: Color = Color {
+    r: 200,
+    g: 180,
+    b: 50,
 };
 
 // 20 frames-per-second maximum
@@ -39,11 +68,11 @@ struct Object {
     x: i32,
     y: i32,
     char: char,
-    color: colors::Color,
+    color: Color,
 }
 
 impl Object {
-    pub fn new(x: i32, y: i32, char: char, color: colors::Color) -> Self {
+    pub fn new(x: i32, y: i32, char: char, color: Color) -> Self {
         Object { x, y, char, color }
     }
 
@@ -58,7 +87,7 @@ impl Object {
     // Set the color and then draw the character that represents this object at its position
     pub fn draw(&self, con: &mut dyn Console) {
         con.set_default_foreground(self.color);
-        con.put_char(self.x, self.y, self.char, console::BackgroundFlag::None);
+        con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
     }
 }
 
@@ -130,8 +159,9 @@ struct Game {
 
 // Tcod struct
 struct Tcod {
-    root: console::Root,
-    con: console::Offscreen,
+    root: Root,
+    con: Offscreen,
+    fov: FovMap,
 }
 
 // Define methods
@@ -255,26 +285,37 @@ fn make_map(player: &mut Object) -> Map {
     map
 }
 
-fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object]) {
+fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: bool) {
     // Draw all objects in the list
     for object in objects {
         object.draw(&mut tcod.con);
+    }
+
+    // recompute FOV if needed (eg. the player moved )
+    if fov_recompute {
+        let player = &objects[0];
+        tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
     }
     
     // Go through all tiles, and set their background color
     for y in 0..MAP_HEIGHT {
         for x in 0..MAP_WIDTH {
+            let visible = tcod.fov.is_in_fov(x, y);
             let wall = game.map[x as usize][y as usize].block_sight;
-            if wall {
-                tcod.con.set_char_background(x, y, COLOR_DARK_WALL, console::BackgroundFlag::Set);
-            } else {
-                tcod.con.set_char_background(x, y, COLOR_DARK_GROUND, console::BackgroundFlag::Set);
-            }
+            let color = match (visible, wall) {
+                // Outside of field of view:
+                (false, true) => COLOR_DARK_WALL,
+                (false, false) => COLOR_DARK_GROUND,
+                // Inside fov:
+                (true, true) => COLOR_LIGHT_WALL,
+                (true, false) => COLOR_LIGHT_GROUND,
+            };
+            tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
         }
     }
     
     // Blit the contents of "con" to the root console
-    console::blit(
+    blit(
         &tcod.con,
         (0, 0),
         (MAP_WIDTH, MAP_HEIGHT),
@@ -287,20 +328,23 @@ fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object]) {
 
 fn main() {
     // Define tcod implementation
-    let root = console::Root::initializer()
-        .font("arial10x10.png", console::FontLayout::Tcod)
-        .font_type(console::FontType::Greyscale)
+    let root = Root::initializer()
+        .font("arial10x10.png", FontLayout::Tcod)
+        .font_type(FontType::Greyscale)
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Qwestr")
         .init();
-    let con = console::Offscreen::new(MAP_WIDTH, MAP_HEIGHT);
-    let mut tcod = Tcod { root, con };
+    let mut tcod = Tcod {
+        root,
+        con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),  
+        fov: FovMap::new(MAP_WIDTH, MAP_HEIGHT),
+    };
     
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
 
     // Create the player
-    let player = Object::new(0, 0, '@', colors::WHITE);
+    let player = Object::new(0, 0, '@', WHITE);
 
     // Create an NPC
     // let npc = Object::new(55, 23, '@', colors::YELLOW);
@@ -314,19 +358,43 @@ fn main() {
         map: make_map(&mut objects[0]),
     };
 
+    // Populate the FOV map, according to the generated map
+    for y in 0..MAP_HEIGHT {
+        for x in 0..MAP_WIDTH {
+            tcod.fov.set(
+                x,
+                y,
+                !game.map[x as usize][y as usize].block_sight,
+                !game.map[x as usize][y as usize].blocked,
+            );
+        }
+    }
+
+    // Keep track of player position
+    // Force FOV "recompute" first time through the game loop
+    let mut previous_player_position = (-1, -1);
+
     // Setup game loop
     while !tcod.root.window_closed() {
         // Clear previous frame
         tcod.con.clear();
 
+        // Determine if FOV should be recomputed
+        let fov_recompute = previous_player_position != (objects[0].x, objects[0].y);
+
         // Render the screen
-        render_all(&mut tcod, &game, &objects);
+        render_all(&mut tcod, &game, &objects, fov_recompute);
         
         // Draw everything on the window at once
         tcod.root.flush();
         
-        // Handle keys/ player movement and exit game if needed
+        // Get player object
         let player = &mut objects[0];
+
+        // Save current position
+        previous_player_position = (player.x, player.y);
+
+        // Handle keys/ player movement and exit game if needed
         let exit = handle_keys(&mut tcod, &game, player);
         if exit {
             break;
