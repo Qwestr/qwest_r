@@ -8,6 +8,7 @@ use tcod::colors::{
     DARKER_RED,
     DESATURATED_GREEN,
     LIGHT_RED,
+    RED,
     WHITE,
 };
 use tcod::console::{
@@ -790,6 +791,7 @@ fn main() {
     // Define game
     let mut game = Game {
         map: make_map(&mut objects),
+        messages: Messages::new(),
     };
 
     // Populate the FOV map, according to the generated map
@@ -807,6 +809,12 @@ fn main() {
     // Keep track of player position
     // Force FOV "recompute" first time through the game loop
     let mut previous_player_position = (-1, -1);
+
+    // Add a warm welcoming message!
+    game.messages.add(
+        "Welcome to Qwestr! Prepare to perish in the Tombs of the Fallen Heroes...",
+        RED,
+    );
 
     // Setup game loop
     while !tcod.root.window_closed() {
