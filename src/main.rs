@@ -2,6 +2,7 @@ use rand::Rng;
 use std::cmp;
 use tcod::colors::{
     Color,
+    DARK_RED,
     DARKER_GREEN,
     DESATURATED_GREEN,
     WHITE,
@@ -86,6 +87,16 @@ enum DeathCallback {
     Monster,
 }
 
+impl DeathCallback {
+    fn callback(self, object: &mut Object) {
+        let callback: fn(&mut Object) = match self {
+            DeathCallback::Player => player_death,
+            DeathCallback::Monster => monster_death,
+        };
+        callback(object);
+    }
+}
+
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
 #[derive(Debug)]
@@ -137,6 +148,14 @@ impl Object {
         if let Some(fighter) = self.fighter.as_mut() {
             if damage > 0 {
                 fighter.hp -= damage;
+            }
+        }
+
+        // Check for death, call the death function
+        if let Some(fighter) = self.fighter {
+            if fighter.hp <= 0 {
+                self.alive = false;
+                fighter.on_death.callback(self);
             }
         }
     }
@@ -312,6 +331,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     hp: 10,
                     defense: 0,
                     power: 3,
+                    on_death: DeathCallback::Monster,
                 });
                 orc.ai = Some(AI::Basic);
                 
@@ -327,6 +347,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     hp: 16,
                     defense: 1,
                     power: 4,
+                    on_death: DeathCallback::Monster,
                 });
                 troll.ai = Some(AI::Basic);
 
@@ -477,6 +498,27 @@ fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &Game, objects: &mut [Obje
     }
 }
 
+fn player_death(player: &mut Object) {
+    // The game ended!
+    println!("You died!");
+
+    // For added effect, transform the player into a corpse!
+    player.char = '%';
+    player.color = DARK_RED;
+}
+
+fn monster_death(monster: &mut Object) {
+    // Transform it into a nasty corpse!
+    // It doesn't block, can't be attacked and doesn't move
+    println!("{} is dead!", monster.name);
+    monster.char = '%';
+    monster.color = DARK_RED;
+    monster.blocks = false;
+    monster.fighter = None;
+    monster.ai = None;
+    monster.name = format!("remains of {}", monster.name);
+}
+
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
     // Recompute FOV if needed (eg. the player moved )
     if fov_recompute {
@@ -624,6 +666,7 @@ fn main() {
         hp: 30,
         defense: 2,
         power: 5,
+        on_death: DeathCallback::Player,
     });
 
     // Give player life!
