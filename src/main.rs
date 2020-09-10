@@ -14,6 +14,7 @@ use tcod::console::{
     FontType,
     Offscreen,
     Root,
+    TextAlignment,
 };
 use tcod::map::{
     FovAlgorithm,
@@ -399,61 +400,6 @@ fn make_map(objects: &mut Vec<Object>) -> Map {
     map
 }
 
-fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
-    // Recompute FOV if needed (eg. the player moved )
-    if fov_recompute {
-        let player = &objects[PLAYER];
-        tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
-    }
-    
-    // Go through all tiles, and set their background color
-    for y in 0..MAP_HEIGHT {
-        for x in 0..MAP_WIDTH {
-            // Get visible state of tile
-            let visible = tcod.fov.is_in_fov(x, y);
-            let wall = game.map[x as usize][y as usize].block_sight;
-            let color = match (visible, wall) {
-                // Outside of field of view:
-                (false, true) => COLOR_DARK_WALL,
-                (false, false) => COLOR_DARK_GROUND,
-                // Inside fov:
-                (true, true) => COLOR_LIGHT_WALL,
-                (true, false) => COLOR_LIGHT_GROUND,
-            };
-
-            // Get explored state of tile
-            let explored = &mut game.map[x as usize][y as usize].explored;
-            // If it's visible, set explored to true
-            if visible {
-                *explored = true;
-            }
-
-            // Show explored tiles only (any visible tile is explored already)
-            if *explored {
-                tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
-            }
-        }
-    }
-
-    // Draw all objects in the list (if it's in FOV)
-    for object in objects {
-        if tcod.fov.is_in_fov(object.x, object.y) {
-            object.draw(&mut tcod.con);
-        }
-    }
-    
-    // Blit the contents of "con" to the root console
-    blit(
-        &tcod.con,
-        (0, 0),
-        (MAP_WIDTH, MAP_HEIGHT),
-        &mut tcod.root,
-        (0, 0),
-        1.0,
-        1.0,
-    );
-}
-
 fn is_blocked(x: i32, y: i32, map: &Map, objects: &[Object]) -> bool {
     // First test the map tile
     if map[x as usize][y as usize].blocked {
@@ -521,6 +467,73 @@ fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &Game, objects: &mut [Obje
             let (monster, player) = mut_two(monster_id, PLAYER, objects);
             monster.attack(player);
         }
+    }
+}
+
+fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
+    // Recompute FOV if needed (eg. the player moved )
+    if fov_recompute {
+        let player = &objects[PLAYER];
+        tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
+    }
+    
+    // Go through all tiles, and set their background color
+    for y in 0..MAP_HEIGHT {
+        for x in 0..MAP_WIDTH {
+            // Get visible state of tile
+            let visible = tcod.fov.is_in_fov(x, y);
+            let wall = game.map[x as usize][y as usize].block_sight;
+            let color = match (visible, wall) {
+                // Outside of field of view:
+                (false, true) => COLOR_DARK_WALL,
+                (false, false) => COLOR_DARK_GROUND,
+                // Inside fov:
+                (true, true) => COLOR_LIGHT_WALL,
+                (true, false) => COLOR_LIGHT_GROUND,
+            };
+
+            // Get explored state of tile
+            let explored = &mut game.map[x as usize][y as usize].explored;
+            // If it's visible, set explored to true
+            if visible {
+                *explored = true;
+            }
+
+            // Show explored tiles only (any visible tile is explored already)
+            if *explored {
+                tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
+            }
+        }
+    }
+
+    // Draw all objects in the list (if it's in FOV)
+    for object in objects {
+        if tcod.fov.is_in_fov(object.x, object.y) {
+            object.draw(&mut tcod.con);
+        }
+    }
+    
+    // Blit the contents of "con" to the root console
+    blit(
+        &tcod.con,
+        (0, 0),
+        (MAP_WIDTH, MAP_HEIGHT),
+        &mut tcod.root,
+        (0, 0),
+        1.0,
+        1.0,
+    );
+
+    // Show the player's stats
+    tcod.root.set_default_foreground(WHITE);
+    if let Some(fighter) = objects[PLAYER].fighter {
+        tcod.root.print_ex(
+            1,
+            SCREEN_HEIGHT - 2,
+            BackgroundFlag::None,
+            TextAlignment::Left,
+            format!("HP: {}/{} ", fighter.hp, fighter.max_hp),
+        );
     }
 }
 
