@@ -2,9 +2,12 @@ use rand::Rng;
 use std::cmp;
 use tcod::colors::{
     Color,
+    BLACK,
     DARK_RED,
     DARKER_GREEN,
+    DARKER_RED,
     DESATURATED_GREEN,
+    LIGHT_RED,
     WHITE,
 };
 use tcod::console::{
@@ -26,9 +29,14 @@ use tcod::map::{
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 
+// Sizes and coordinates relevant for the GUI
+const BAR_WIDTH: i32 = 20;
+const PANEL_HEIGHT: i32 = 7;
+const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
+
 // Size of the map
 const MAP_WIDTH: i32 = 80;
-const MAP_HEIGHT: i32 = 45;
+const MAP_HEIGHT: i32 = 43;
 
 // Room parameters for dungeon generator
 const ROOM_MAX_SIZE: i32 = 10;
@@ -544,6 +552,16 @@ fn render_bar(
     if bar_width > 0 {
         panel.rect(x, y, bar_width, 1, false, BackgroundFlag::Screen);
     }
+
+    // Finally, some centered text with the values
+    panel.set_default_foreground(WHITE);
+    panel.print_ex(
+        x + total_width / 2,
+        y,
+        BackgroundFlag::None,
+        TextAlignment::Center,
+        &format!("{}: {}/{}", name, value, maximum),
+    );
 }
 
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
@@ -602,17 +620,35 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         1.0,
     );
 
-    // Show the player's stats
-    tcod.root.set_default_foreground(WHITE);
-    if let Some(fighter) = objects[PLAYER].fighter {
-        tcod.root.print_ex(
-            1,
-            SCREEN_HEIGHT - 2,
-            BackgroundFlag::None,
-            TextAlignment::Left,
-            format!("HP: {}/{} ", fighter.hp, fighter.max_hp),
-        );
-    }
+    // Prepare to render the GUI panel
+    tcod.panel.set_default_background(BLACK);
+    tcod.panel.clear();
+
+    // Render the player's stats
+    let hp = objects[PLAYER].fighter.map_or(0, |f| f.hp);
+    let max_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp);
+    render_bar(
+        &mut tcod.panel,
+        1,
+        1,
+        BAR_WIDTH,
+        "HP",
+        hp,
+        max_hp,
+        LIGHT_RED,
+        DARKER_RED
+    );
+
+    // Blit the contents of "panel" to the root console
+    blit(
+        &tcod.panel,
+        (0, 0),
+        (SCREEN_WIDTH, PANEL_HEIGHT),
+        &mut tcod.root,
+        (0, PANEL_Y),
+        1.0,
+        1.0,
+    );
 }
 
 // Define methods
