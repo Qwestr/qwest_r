@@ -556,7 +556,11 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     }
 
     // Draw all objects in the list (if it's in FOV)
-    for object in objects {
+    let mut to_draw: Vec<_> = objects.iter().collect();
+    // Sort so that non-blocknig objects come first
+    to_draw.sort_by(|o1, o2| { o1.blocks.cmp(&o2.blocks) });
+    // Draw the objects in the list
+    for object in &to_draw {
         if tcod.fov.is_in_fov(object.x, object.y) {
             object.draw(&mut tcod.con);
         }
