@@ -8,6 +8,7 @@ use tcod::colors::{
     DARKER_RED,
     DESATURATED_GREEN,
     GOLD,
+    LIGHT_GREY,
     LIGHT_RED,
     ORANGE,
     RED,
@@ -653,7 +654,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         object.draw(&mut tcod.con);
     }
     
-    // Blit the contents of "con" to the root console
+    // Add the contents of con to the root console
     console::blit(
         &tcod.con,
         (0, 0),
@@ -683,6 +684,16 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         DARKER_RED
     );
 
+    // Render the names of objects under the mouse
+    tcod.panel.set_default_foreground(LIGHT_GREY);
+    tcod.panel.print_ex(
+        1,
+        0,
+        BackgroundFlag::None,
+        TextAlignment::Left,
+        get_names_under_mouse(tcod.mouse, objects, &tcod.fov),
+    );
+
     // Render the game messages, one line at a time,
     // from top to bottom, until the end of the screen is hit.
     
@@ -703,7 +714,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         tcod.panel.print_rect(MSG_X, y, MSG_WIDTH, 0, msg);
     }
 
-    // Blit the contents of "panel" to the root console
+    // Add the contents of panel to the root console
     console::blit(
         &tcod.panel,
         (0, 0),
@@ -715,7 +726,22 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     );
 }
 
-// Define methods
+// Return a string with the names of all objects under the mouse
+fn get_names_under_mouse(mouse: Mouse, objects: &[Object], fov_map: &FovMap) -> String {
+    let (x, y) = (mouse.cx as i32, mouse.cy as i32);
+
+    // Create a list with the names of all objects at the mouse's coordinates and in FOV
+    let names = objects
+        .iter()
+        .filter(|obj| obj.pos() == (x, y) && fov_map.is_in_fov(obj.x, obj.y))
+        .map(|obj| obj.name.clone())
+        .collect::<Vec<_>>();
+
+    // Join the names, separated by commas
+    names.join(", ") 
+}
+
+// Handle key input
 fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {    
     // Get status of player
     let player_alive = objects[PLAYER].alive;
