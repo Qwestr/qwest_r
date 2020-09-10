@@ -12,6 +12,7 @@ use tcod::colors::{
     LIGHT_RED,
     ORANGE,
     RED,
+    VIOLET,
     WHITE,
 };
 use tcod::console::{
@@ -59,6 +60,7 @@ const ROOM_MAX_SIZE: i32 = 10;
 const ROOM_MIN_SIZE: i32 = 6;
 const MAX_ROOMS: i32 = 30;
 const MAX_ROOM_MONSTERS: i32 = 3;
+const MAX_ROOM_ITEMS: i32 = 2;
 
 // Default FOV algorithm and other values
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
@@ -414,6 +416,22 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
             // Add monster to objects list
             objects.push(monster);
+        }
+    }
+
+    // Choose random number of items
+    let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
+
+    for _ in 0..num_items {
+        // choose random spot for this item
+        let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
+        let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
+
+        // Only place it if the tile is not blocked
+        if !is_blocked(x, y, map, objects) {
+            // Create an example healing potion
+            let object = Object::new(x, y, '!', "healing potion", VIOLET, false);
+            objects.push(object);
         }
     }
 }
