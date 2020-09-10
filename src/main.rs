@@ -461,14 +461,14 @@ fn move_towards(id: usize, target_x: i32, target_y: i32, map: &Map, objects: &mu
 }
 
 fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut [Object]) {
-    // the coordinates the player is moving to/attacking
+    // The coordinates the player is moving to/attacking
     let x = objects[PLAYER].x + dx;
     let y = objects[PLAYER].y + dy;
 
-    // try to find an attackable object there
-    let target_id = objects.iter().position(|object| object.pos() == (x, y));
+    // Try to find an attackable object there
+    let target_id = objects.iter().position(|object| object.fighter.is_some() && object.pos() == (x, y));
 
-    // attack if target found, move otherwise
+    // Attack if target found, move otherwise
     match target_id {
         Some(target_id) => {
             // Attack the target
