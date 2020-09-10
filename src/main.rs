@@ -382,6 +382,28 @@ fn move_by(id: usize, dx: i32, dy: i32, map: &Map, objects: &mut [Object]) {
     }
 }
 
+fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut [Object]) {
+    // the coordinates the player is moving to/attacking
+    let x = objects[PLAYER].x + dx;
+    let y = objects[PLAYER].y + dy;
+
+    // try to find an attackable object there
+    let target_id = objects.iter().position(|object| object.pos() == (x, y));
+
+    // attack if target found, move otherwise
+    match target_id {
+        Some(target_id) => {
+            println!(
+                "The {} laughs at your puny efforts to attack him!",
+                objects[target_id].name
+            );
+        }
+        None => {
+            move_by(PLAYER, dx, dy, &game.map, objects);
+        }
+    }
+}
+
 // Define methods
 fn handle_keys(tcod: &mut Tcod, game: &Game, objects: &mut Vec<Object>) -> PlayerAction {
     // Import modules
@@ -398,19 +420,19 @@ fn handle_keys(tcod: &mut Tcod, game: &Game, objects: &mut Vec<Object>) -> Playe
     match (key, key.text(), player_alive) {
         // Movement keys
         (Key { code: Up, .. }, _, true) => {
-            move_by(PLAYER, 0, -1, &game.map, objects);
+            player_move_or_attack(0, -1, game, objects);
             return PlayerAction::TookTurn;
         },
         (Key {code: Down, .. }, _, true) => {
-            move_by(PLAYER, 0, 1, &game.map, objects);
+            player_move_or_attack(0, 1, game, objects);
             return PlayerAction::TookTurn;
         },
         (Key { code: Left, .. }, _, true) => {
-            move_by(PLAYER, -1, 0, &game.map, objects);
+            player_move_or_attack(-1, 0, game, objects);
             return PlayerAction::TookTurn;
         },
         (Key { code: Right, .. }, _, true) => {
-            move_by(PLAYER, 1, 0, &game.map, objects);
+            player_move_or_attack(1, 0, game, objects);
             return PlayerAction::TookTurn;
         },
        (Key {
@@ -517,7 +539,7 @@ fn main() {
             for object in &objects {
                 // only if object is not player
                 if (object as *const _) != (&objects[PLAYER] as *const _) {
-                    println!("The {} growls!", object.name);
+                    // println!("The {} growls!", object.name);
                 }
             }
         }
