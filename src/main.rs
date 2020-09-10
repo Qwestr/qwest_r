@@ -110,6 +110,10 @@ impl DeathCallback {
     }
 }
 
+struct Messages {
+    messages: Vec<(String, Color)>,
+}
+
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
 #[derive(Debug)]
