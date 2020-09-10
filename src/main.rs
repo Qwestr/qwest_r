@@ -108,6 +108,11 @@ enum AI {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+enum Item {
+    Heal,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum DeathCallback {
     Player,
     Monster,
