@@ -24,7 +24,7 @@ use tcod::console::{
     TextAlignment,
 };
 use tcod::input::{
-    // self,
+    self,
     Event,
     Key,
     KeyCode,
@@ -320,6 +320,8 @@ struct Tcod {
     con: Offscreen,
     panel: Offscreen,
     fov: FovMap,
+    key: Key,  
+    mouse: Mouse,
 }
 
 // Mutably borrow two *separate* elements from the given slice.
@@ -715,14 +717,11 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
 
 // Define methods
 fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {    
-    // Wait for keypress
-    let key = tcod.root.wait_for_keypress(true);
-
     // Get status of player
     let player_alive = objects[PLAYER].alive;
     
     // Determine which key was pressed
-    match (key, key.text(), player_alive) {
+    match (tcod.key, tcod.key.text(), player_alive) {
         // Movement keys
         (Key { code: KeyCode::Up, .. }, _, true) => {
             player_move_or_attack(0, -1, game, objects);
@@ -776,6 +775,8 @@ fn main() {
         con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),
         panel: Offscreen::new(SCREEN_WIDTH, PANEL_HEIGHT),  
         fov: FovMap::new(MAP_WIDTH, MAP_HEIGHT),
+        key: Default::default(),
+        mouse: Default::default(),
     };
     
     // Define FPS
@@ -835,6 +836,13 @@ fn main() {
         // Determine if FOV should be recomputed
         let fov_recompute = previous_player_position != objects[PLAYER].pos();
 
+        // Check for input event
+        match input::check_for_event(input::MOUSE | input::KEY_PRESS) {
+            Some((_, Event::Mouse(m))) => tcod.mouse = m,
+            Some((_, Event::Key(k))) => tcod.key = k,
+            _ => tcod.key = Default::default(),
+        }
+
         // Render the screen
         render_all(&mut tcod, &mut game, &objects, fov_recompute);
         
@@ -849,7 +857,6 @@ fn main() {
 
         // Get player action
         let player_action = handle_keys(&mut tcod, &mut game, &mut objects);
-
 
         // Exit the game if Exit action was taken
         if player_action == PlayerAction::Exit {
