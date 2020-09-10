@@ -295,6 +295,7 @@ type Map = Vec<Vec<Tile>>;
 // Game struct
 struct Game {
     map: Map,
+    messages: Messages,
 }
 
 // Tcod struct
@@ -663,6 +664,26 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         LIGHT_RED,
         DARKER_RED
     );
+
+    // Render the game messages, one line at a time,
+    // from top to bottom, until the end of the screen is hit.
+    
+    // As new messages are pushed onto the end of the vector,
+    // and the messages are being interated in reserve
+    let mut y = MSG_HEIGHT as i32;
+    for &(ref msg, color) in game.messages.iter().rev() {
+        // Get the required message height
+        let msg_height = tcod.panel.get_height_rect(MSG_X, y, MSG_WIDTH, 0, msg);
+        // Remove from the current message
+        y -= msg_height;
+        // If the message goes past the bottom of the panel, break the loop
+        if y < 0 {
+            break;
+        }
+        // Print the message
+        tcod.panel.set_default_foreground(color);
+        tcod.panel.print_rect(MSG_X, y, MSG_WIDTH, 0, msg);
+    }
 
     // Blit the contents of "panel" to the root console
     blit(
