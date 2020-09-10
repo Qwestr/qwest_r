@@ -416,12 +416,27 @@ fn is_blocked(x: i32, y: i32, map: &Map, objects: &[Object]) -> bool {
     objects.iter().any(|object| object.blocks && object.pos() == (x, y))
 }
 
-//Move object by the given amount, if the destination is not blocked
+// Move object by the given amount, if the destination is not blocked
 fn move_by(id: usize, dx: i32, dy: i32, map: &Map, objects: &mut [Object]) {
     let (x, y) = objects[id].pos();
     if !is_blocked(x + dx, y + dy, map, objects) {
         objects[id].set_pos(x + dx, y + dy);
     }
+}
+
+fn move_towards(id: usize, target_x: i32, target_y: i32, map: &Map, objects: &mut [Object]) {
+    // Vector from this object to the target, and distance
+    let dx = target_x - objects[id].x;
+    let dy = target_y - objects[id].y;
+    let distance = ((dx.pow(2) + dy.pow(2)) as f32).sqrt();
+
+    // Normalize it to length 1 (preserving direction), then round it and
+    // convert to integer so the movement is restricted to the map grid
+    let dx = (dx as f32 / distance).round() as i32;
+    let dy = (dy as f32 / distance).round() as i32;
+
+    // Move object
+    move_by(id, dx, dy, map, objects);
 }
 
 fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut [Object]) {
