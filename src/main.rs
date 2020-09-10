@@ -4,7 +4,7 @@ use tcod::colors::{
     Color,
     DARKER_GREEN,
     DESATURATED_GREEN,
-    WHITE
+    WHITE,
 };
 use tcod::console::{
     BackgroundFlag,
@@ -13,11 +13,11 @@ use tcod::console::{
     FontLayout,
     FontType,
     Offscreen,
-    Root
+    Root,
 };
 use tcod::map::{
     FovAlgorithm,
-    Map as FovMap
+    Map as FovMap,
 }; 
 
 // Actual size of the window
@@ -43,7 +43,7 @@ const TORCH_RADIUS: i32 = 10;
 const COLOR_DARK_WALL: Color = Color {
     r: 0,
     g: 0,
-    b: 100
+    b: 100,
 };
 const COLOR_LIGHT_WALL: Color = Color {
     r: 130,
@@ -74,6 +74,11 @@ enum PlayerAction {
     Exit,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+enum AI {
+    Basic,
+}
+
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
 #[derive(Debug)]
@@ -85,6 +90,8 @@ struct Object {
     blocks: bool,  
     alive: bool,
     name: String,
+    fighter: Option<Fighter>,  
+    ai: Option<AI>,
 }
 
 impl Object {
@@ -96,7 +103,9 @@ impl Object {
             color,
             blocks,
             alive: false,
-            name: name.into()
+            name: name.into(),
+            fighter: None,  
+            ai: None,
         }
     }
 
@@ -114,6 +123,15 @@ impl Object {
         con.set_default_foreground(self.color);
         con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
     }
+}
+
+// Combat-related properties and methods (monster, player, NPC).
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Fighter {
+    max_hp: i32,
+    hp: i32,
+    defense: i32,
+    power: i32,
 }
 
 // A rectangle on the map, used to characterise a room.
@@ -231,10 +249,34 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
             // Generate the monster
             let mut monster = if rand::random::<f32>() < 0.8 {
                 // Create an orc (80% chance)
-                Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true)
+                let mut orc = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
+                
+                // Set orc components
+                orc.fighter = Some(Fighter {
+                    max_hp: 10,
+                    hp: 10,
+                    defense: 0,
+                    power: 3,
+                });
+                orc.ai = Some(AI::Basic);
+                
+                // Return the orc
+                orc
             } else {
                 // Create a troll (20% chance)
-                Object::new(x, y, 'T', "troll", DARKER_GREEN, true)
+                let mut troll = Object::new(x, y, 'T', "troll", DARKER_GREEN, true);
+
+                // Set troll components
+                troll.fighter = Some(Fighter {
+                    max_hp: 16,
+                    hp: 16,
+                    defense: 1,
+                    power: 4,
+                });
+                troll.ai = Some(AI::Basic);
+
+                // Return the troll
+                troll
             };
 
             // Give the monster life!
@@ -477,6 +519,14 @@ fn main() {
 
     // Create the player
     let mut player = Object::new(0, 0, '@', "player", WHITE, true);
+
+    // Set player's fighter component
+    player.fighter = Some(Fighter {
+        max_hp: 30,
+        hp: 30,
+        defense: 2,
+        power: 5,
+    });
 
     // Give player life!
     player.alive = true;
