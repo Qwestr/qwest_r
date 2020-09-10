@@ -7,20 +7,28 @@ use tcod::colors::{
     DARKER_GREEN,
     DARKER_RED,
     DESATURATED_GREEN,
+    GOLD,
     LIGHT_RED,
     ORANGE,
     RED,
     WHITE,
 };
 use tcod::console::{
+    self,
     BackgroundFlag,
-    blit,
     Console,
     FontLayout,
     FontType,
     Offscreen,
     Root,
     TextAlignment,
+};
+use tcod::input::{
+    // self,
+    Event,
+    Key,
+    KeyCode,
+    Mouse
 };
 use tcod::map::{
     FovAlgorithm,
@@ -644,7 +652,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     }
     
     // Blit the contents of "con" to the root console
-    blit(
+    console::blit(
         &tcod.con,
         (0, 0),
         (MAP_WIDTH, MAP_HEIGHT),
@@ -694,7 +702,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     }
 
     // Blit the contents of "panel" to the root console
-    blit(
+    console::blit(
         &tcod.panel,
         (0, 0),
         (SCREEN_WIDTH, PANEL_HEIGHT),
@@ -706,11 +714,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
 }
 
 // Define methods
-fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {
-    // Import modules
-    use tcod::input::Key;
-    use tcod::input::KeyCode::*;
-    
+fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {    
     // Wait for keypress
     let key = tcod.root.wait_for_keypress(true);
 
@@ -720,24 +724,24 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     // Determine which key was pressed
     match (key, key.text(), player_alive) {
         // Movement keys
-        (Key { code: Up, .. }, _, true) => {
+        (Key { code: KeyCode::Up, .. }, _, true) => {
             player_move_or_attack(0, -1, game, objects);
             return PlayerAction::TookTurn;
         },
-        (Key {code: Down, .. }, _, true) => {
+        (Key {code: KeyCode::Down, .. }, _, true) => {
             player_move_or_attack(0, 1, game, objects);
             return PlayerAction::TookTurn;
         },
-        (Key { code: Left, .. }, _, true) => {
+        (Key { code: KeyCode::Left, .. }, _, true) => {
             player_move_or_attack(-1, 0, game, objects);
             return PlayerAction::TookTurn;
         },
-        (Key { code: Right, .. }, _, true) => {
+        (Key { code: KeyCode::Right, .. }, _, true) => {
             player_move_or_attack(1, 0, game, objects);
             return PlayerAction::TookTurn;
         },
        (Key {
-            code: Enter,
+            code: KeyCode::Enter,
             alt: true,
             ..
         },
@@ -749,7 +753,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             // Return action
             return PlayerAction::DidntTakeTurn;
         }
-        (Key { code: Escape, .. }, _, _) => {
+        (Key { code: KeyCode::Escape, .. }, _, _) => {
             // Exit game
             return PlayerAction::Exit;
         },
@@ -820,7 +824,7 @@ fn main() {
     // Add a warm welcoming message!
     game.messages.add(
         "Welcome to Qwestr! Prepare to perish in the Tombs of the Fallen Heroes...",
-        RED,
+        GOLD,
     );
 
     // Setup game loop
