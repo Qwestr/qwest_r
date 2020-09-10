@@ -130,6 +130,7 @@ impl Rect {
 #[derive(Clone, Copy, Debug)]
 struct Tile {
     blocked: bool,
+    explored: bool,
     block_sight: bool,
 }
 
@@ -137,6 +138,7 @@ impl Tile {
     pub fn empty() -> Self {
         Tile {
             blocked: false,
+            explored: false,
             block_sight: false,
         }
     }
@@ -144,6 +146,7 @@ impl Tile {
     pub fn wall() -> Self {
         Tile {
             blocked: true,
+            explored: false,
             block_sight: true,
         }
     }
@@ -285,7 +288,7 @@ fn make_map(player: &mut Object) -> Map {
     map
 }
 
-fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: bool) {
+fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
     // Recompute FOV if needed (eg. the player moved )
     if fov_recompute {
         let player = &objects[0];
@@ -295,6 +298,7 @@ fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: b
     // Go through all tiles, and set their background color
     for y in 0..MAP_HEIGHT {
         for x in 0..MAP_WIDTH {
+            // Get visible state of tile
             let visible = tcod.fov.is_in_fov(x, y);
             let wall = game.map[x as usize][y as usize].block_sight;
             let color = match (visible, wall) {
@@ -305,7 +309,18 @@ fn render_all(tcod: &mut Tcod, game: &Game, objects: &[Object], fov_recompute: b
                 (true, true) => COLOR_LIGHT_WALL,
                 (true, false) => COLOR_LIGHT_GROUND,
             };
-            tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
+
+            // Get explored state of tile
+            let explored = &mut game.map[x as usize][y as usize].explored;
+            // If it's visible, set explored to true
+            if visible {
+                *explored = true;
+            }
+
+            // Show explored tiles only (any visible tile is explored already)
+            if *explored {
+                tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
+            }
         }
     }
 
@@ -356,7 +371,7 @@ fn main() {
     let mut objects = [player];
 
     // Define game
-    let game = Game {
+    let mut game = Game {
         map: make_map(&mut objects[0]),
     };
 
@@ -385,7 +400,7 @@ fn main() {
         let fov_recompute = previous_player_position != (objects[0].x, objects[0].y);
 
         // Render the screen
-        render_all(&mut tcod, &game, &objects, fov_recompute);
+        render_all(&mut tcod, &mut game, &objects, fov_recompute);
         
         // Draw everything on the window at once
         tcod.root.flush();
