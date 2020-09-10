@@ -503,10 +503,23 @@ fn main() {
         // Save current position
         previous_player_position = (player.x, player.y);
 
-        // Handle keys/ player movement and exit game if needed
+        // Get player action
         let player_action = handle_keys(&mut tcod, &game, &mut objects);
+
+
+        // Exit the game if Exit action was taken
         if player_action == PlayerAction::Exit {
             break;
+        }
+
+        // Let monsters take their turn
+        if objects[PLAYER].alive && player_action != PlayerAction::DidntTakeTurn {
+            for object in &objects {
+                // only if object is not player
+                if (object as *const _) != (&objects[PLAYER] as *const _) {
+                    println!("The {} growls!", object.name);
+                }
+            }
         }
     }
 }
