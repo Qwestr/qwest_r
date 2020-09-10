@@ -8,6 +8,7 @@ use tcod::colors::{
     DARKER_RED,
     DESATURATED_GREEN,
     GOLD,
+    GREEN,
     LIGHT_GREY,
     LIGHT_RED,
     ORANGE,
@@ -161,6 +162,7 @@ struct Object {
     name: String,
     fighter: Option<Fighter>,  
     ai: Option<AI>,
+    item: Option<Item>,
 }
 
 impl Object {
@@ -175,6 +177,7 @@ impl Object {
             name: name.into(),
             fighter: None,  
             ai: None,
+            item: None,
         }
     }
 
@@ -435,9 +438,14 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Only place it if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
-            // Create an example healing potion
-            let object = Object::new(x, y, '!', "healing potion", VIOLET, false);
-            objects.push(object);
+            // Create a healing potion
+            let mut potion = Object::new(x, y, '!', "healing potion", VIOLET, false);
+
+            // Set potion components
+            potion.item = Some(Item::Heal);
+
+            // Add potion to objects list
+            objects.push(potion);
         }
     }
 }
@@ -557,6 +565,26 @@ fn player_move_or_attack(dx: i32, dy: i32, game: &mut Game, objects: &mut [Objec
             // Move the player
             move_by(PLAYER, dx, dy, &game.map, objects);
         }
+    }
+}
+
+// Add to the player's inventory and remove from the map
+fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    if game.inventory.len() >= 26 {
+        game.messages.add(
+            format!(
+                "Your inventory is full, cannot pick up {}.",
+                objects[object_id].name
+            ),
+            RED,
+        );
+    } else {
+        let item = objects.swap_remove(object_id);
+        game.messages.add(
+            format!("You picked up a {}!", item.name),
+            GREEN
+        );
+        game.inventory.push(item);
     }
 }
 
@@ -789,6 +817,16 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             player_move_or_attack(1, 0, game, objects);
             return PlayerAction::TookTurn;
         },
+        (Key { code: KeyCode::Text, .. }, "g", true) => {
+            // pick up an item
+            let item_id = objects
+                .iter()
+                .position(|object| object.pos() == objects[PLAYER].pos() && object.item.is_some());
+            if let Some(item_id) = item_id {
+                pick_item_up(item_id, game, objects);
+            }
+            return PlayerAction::DidntTakeTurn;
+        }
        (Key {
             code: KeyCode::Enter,
             alt: true,
