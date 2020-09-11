@@ -666,8 +666,27 @@ fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
 }
 
 fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &mut [Object]) {
-    // A basic monster takes its turn. If you can see it, it can see you
+    // Take AI component of monster
+    if let Some(ai) = objects[monster_id].ai.take() {
+        // Perform action based on AI variant (return new AI)
+        let new_ai = match ai {
+            AI::Basic => ai_basic(monster_id, tcod, game, objects),
+            AI::Confused {
+                previous_ai,
+                num_turns,
+            } => ai_confused(monster_id, tcod, game, objects, previous_ai, num_turns),
+        };
+
+        // Set new AI of monster
+        objects[monster_id].ai = Some(new_ai);
+    }
+}
+
+fn ai_basic(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &mut [Object]) -> AI {
+    // A basic monster takes its turn
     let (monster_x, monster_y) = objects[monster_id].pos();
+
+    // If you can see it, it can see you
     if tcod.fov.is_in_fov(monster_x, monster_y) {
         if objects[monster_id].distance_to(&objects[PLAYER]) >= 2.0 {
             // Move towards player if far away
@@ -678,6 +697,45 @@ fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &mut [
             let (monster, player) = mut_two(monster_id, PLAYER, objects);
             monster.attack(player, game);
         }
+    }
+
+    // Return Basic AI variant
+    AI::Basic
+}
+
+fn ai_confused(
+    monster_id: usize,
+    _tcod: &Tcod,
+    game: &mut Game,
+    objects: &mut [Object],
+    previous_ai: Box<AI>,
+    num_turns: i32,
+) -> AI {
+    if num_turns >= 0 {
+        // Monster still in confused state!
+        // Move in a random direction
+        move_by(
+            monster_id,
+            rand::thread_rng().gen_range(-1, 2),
+            rand::thread_rng().gen_range(-1, 2),
+            &game.map,
+            objects,
+        );
+
+        // Return a Confused AI with a decreased number of turns
+        AI::Confused {
+            previous_ai: previous_ai,
+            num_turns: num_turns - 1,
+        }
+    } else {
+        // Indicate that the monster is no longer confused
+        game.messages.add(
+            format!("The {} is no longer confused!", objects[monster_id].name),
+            RED,
+        );
+
+        // Restore the previous AI (this one will be deleted)
+        *previous_ai
     }
 }
 
