@@ -838,7 +838,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             return PlayerAction::TookTurn;
         },
         (Key { code: KeyCode::Text, .. }, "g", true) => {
-            // pick up an item
+            // Pick up an item
             let item_id = objects
                 .iter()
                 .position(|object| object.pos() == objects[PLAYER].pos() && object.item.is_some());
@@ -849,11 +849,15 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
         },
         (Key { code: KeyCode::Text, .. }, "i", true) => {
             // Show the inventory
-            inventory_menu(
+            let inventory_index = inventory_menu(
                 &game.inventory,
                 "Press the key next to an item to use it, or any other to cancel.\n",
                 &mut tcod.root,
             );
+            // If an item is selected, use it
+            if let Some(inventory_index) = inventory_index {
+                use_item(inventory_index, tcod, game, objects);
+            }
             return PlayerAction::TookTurn;
         },
        (Key {
