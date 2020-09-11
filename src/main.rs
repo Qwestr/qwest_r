@@ -46,6 +46,7 @@ const SCREEN_HEIGHT: i32 = 50;
 const BAR_WIDTH: i32 = 20;
 const PANEL_HEIGHT: i32 = 7;
 const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
+const INVENTORY_WIDTH: i32 = 50;
 
 // Message log GUI constants
 const MSG_X: i32 = BAR_WIDTH + 2;
@@ -826,7 +827,16 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
                 pick_item_up(item_id, game, objects);
             }
             return PlayerAction::DidntTakeTurn;
-        }
+        },
+        (Key { code: KeyCode::Text, .. }, "i", true) => {
+            // Show the inventory
+            inventory_menu(
+                &game.inventory,
+                "Press the key next to an item to use it, or any other to cancel.\n",
+                &mut tcod.root,
+            );
+            return PlayerAction::TookTurn;
+        },
        (Key {
             code: KeyCode::Enter,
             alt: true,
@@ -906,6 +916,24 @@ fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root)
         } else {
             None
         }
+    } else {
+        None
+    }
+}
+
+fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option<usize> {
+    // how a menu with each item of the inventory as an option
+    let options = if inventory.len() == 0 {
+        vec!["Inventory is empty.".into()]
+    } else {
+        inventory.iter().map(|item| item.name.clone()).collect()
+    };
+
+    let inventory_index = menu(header, &options, INVENTORY_WIDTH, root);
+
+    // if an item was chosen, return it
+    if inventory.len() > 0 {
+        inventory_index
     } else {
         None
     }
