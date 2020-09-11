@@ -1441,12 +1441,14 @@ fn main_menu(tcod: &mut Tcod) {
 
         match choice {  
             Some(0) => {
-                // New game
+                // Create a new game
                 let (mut game, mut objects) = new_game(tcod);
+
+                // Play the game!
                 play_game(tcod, &mut game, &mut objects);
             }
             Some(2) => {
-                // quit
+                // Quit
                 break;
             }
             _ => {}  
@@ -1474,11 +1476,8 @@ fn main() {
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
 
-    // Create a new game
-    let (mut game, mut objects) = new_game(&mut tcod);
-
-    // Play the game!
-    play_game(&mut tcod, &mut game, &mut objects);
+    // Show the main menu
+    main_menu(&mut tcod);
 }
 
 // use qwest_r::play;
