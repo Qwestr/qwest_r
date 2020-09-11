@@ -1018,10 +1018,6 @@ fn target_tile(
     max_range: Option<f32>,
 ) -> Option<(i32, i32)> {
     loop {
-        // Flush the screen
-        // This erases the inventory and shows the names of objects under the mouse.
-        tcod.root.flush();
-
         // Check for input event
         let event = input::check_for_event(input::KEY_PRESS | input::MOUSE).map(|e| e.1);
         match event {
@@ -1032,6 +1028,10 @@ fn target_tile(
 
         // Render the screen
         render_all(tcod, game, objects, false);
+
+        // Draw everything on the window at once
+        // This erases the inventory and shows the names of objects under the mouse.
+        tcod.root.flush();
 
         // Get (x, y) coordinates of the mouse
         let (x, y) = (tcod.mouse.cx as i32, tcod.mouse.cy as i32);
@@ -1239,7 +1239,7 @@ fn cast_fireball(
     game: &mut Game,
     objects: &mut [Object],
 ) -> UseResult {
-    // ask the player for a target tile to throw a fireball at
+    // Ask the player for a target tile to throw a fireball at
     game.messages.add(
         "Left-click a target tile for the fireball, or right-click to cancel.",
         LIGHT_CYAN,
