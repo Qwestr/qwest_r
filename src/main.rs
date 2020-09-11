@@ -1002,6 +1002,37 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     }
 }
 
+// Return the position of a tile left-clicked in player's FOV
+// (optionally in a range), or (None,None) if right-clicked.
+fn target_tile(
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &[Object],
+    max_range: Option<f32>,
+) -> Option<(i32, i32)> {
+    loop {
+        // Flush the screen
+        // This erases the inventory and shows the names of objects under the mouse.
+        tcod.root.flush();
+
+        // Check for input event
+        let event = input::check_for_event(input::KEY_PRESS | input::MOUSE).map(|e| e.1);
+        match event {
+            Some(Event::Mouse(m)) => tcod.mouse = m,
+            Some(Event::Key(k)) => tcod.key = k,
+            None => tcod.key = Default::default(),
+        }
+
+        // Render the screen
+        render_all(tcod, game, objects, false);
+
+        // Get (x, y) coordinates of the mouse
+        let (x, y) = (tcod.mouse.cx as i32, tcod.mouse.cy as i32);
+
+        // ...
+    }
+}
+
 fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root) -> Option<usize> {
     // Assert that the menu doesn't exceed 26 options
     assert!(
