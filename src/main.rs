@@ -115,6 +115,10 @@ enum PlayerAction {
 #[derive(Clone, Debug, PartialEq)]
 enum AI {
     Basic,
+    Confused {
+        previous_ai: Box<AI>,
+        num_turns: i32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
