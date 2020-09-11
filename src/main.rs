@@ -1317,6 +1317,7 @@ fn cast_fireball(
     UseResult::UsedUp
 }
 
+/// Start a new game
 fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     // Create the player
     let mut player = Object::new(0, 0, '@', "player", WHITE, true);
@@ -1344,7 +1345,7 @@ fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     };
 
     // Initialize FOV map
-    // initialise_fov(tcod, &game.map);
+    initialise_fov(tcod, &game.map);
 
     // Add a warm welcoming message!
     game.messages.add(
@@ -1354,6 +1355,21 @@ fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
 
     // Return game, objects
     (game, objects)
+}
+
+/// Initialize FOV
+fn initialise_fov(tcod: &mut Tcod, map: &Map) {
+    // Create the FOV map, according to the generated map
+    for y in 0..MAP_HEIGHT {
+        for x in 0..MAP_WIDTH {
+            tcod.fov.set(
+                x,
+                y,
+                !map[x as usize][y as usize].block_sight,
+                !map[x as usize][y as usize].blocked,
+            );
+        }
+    }
 }
 
 fn main() {
@@ -1376,20 +1392,8 @@ fn main() {
     // Define FPS
     tcod::system::set_fps(LIMIT_FPS);
 
-    // New game
+    // Create a new game
     let (mut game, mut objects) = new_game(&mut tcod);
-
-    // Populate the FOV map, according to the generated map
-    for y in 0..MAP_HEIGHT {
-        for x in 0..MAP_WIDTH {
-            tcod.fov.set(
-                x,
-                y,
-                !game.map[x as usize][y as usize].block_sight,
-                !game.map[x as usize][y as usize].blocked,
-            );
-        }
-    }
 
     // Keep track of player position
     // Force FOV "recompute" first time through the game loop
