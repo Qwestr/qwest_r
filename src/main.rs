@@ -1009,48 +1009,6 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     }
 }
 
-// Return the position of a tile left-clicked in player's FOV
-// (optionally in a range), or (None,None) if right-clicked.
-fn target_tile(
-    tcod: &mut Tcod,
-    game: &mut Game,
-    objects: &[Object],
-    max_range: Option<f32>,
-) -> Option<(i32, i32)> {
-    loop {
-        // Check for input event
-        let event = input::check_for_event(input::KEY_PRESS | input::MOUSE).map(|e| e.1);
-        match event {
-            Some(Event::Mouse(m)) => tcod.mouse = m,
-            Some(Event::Key(k)) => tcod.key = k,
-            None => tcod.key = Default::default(),
-        }
-
-        // Render the screen
-        render_all(tcod, game, objects, false);
-
-        // Draw everything on the window at once
-        // This erases the inventory and shows the names of objects under the mouse.
-        tcod.root.flush();
-
-        // Get (x, y) coordinates of the mouse
-        let (x, y) = (tcod.mouse.cx as i32, tcod.mouse.cy as i32);
-
-        // Accept the target if the player clicked in FOV,
-        let in_fov = (x < MAP_WIDTH) && (y < MAP_HEIGHT) && tcod.fov.is_in_fov(x, y);
-        // and in case a range is specified, if it's in that range
-        let in_range = max_range.map_or(true, |range| objects[PLAYER].distance(x, y) <= range);
-        if tcod.mouse.lbutton_pressed && in_fov && in_range {
-            return Some((x, y));
-        }
-
-        // Cancel if the player right-clicked or pressed Escape
-        if tcod.mouse.rbutton_pressed || tcod.key.code == KeyCode::Escape {
-            return None;
-        }
-    }
-}
-
 fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root) -> Option<usize> {
     // Assert that the menu doesn't exceed 26 options
     assert!(
@@ -1077,7 +1035,7 @@ fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root)
         header,
     );
 
-    // print all the options
+    // Print all the options
     for (index, option_text) in options.iter().enumerate() {
         let menu_letter = (b'a' + index as u8) as char;
         let text = format!("({}) {}", menu_letter, option_text.as_ref());
@@ -1153,6 +1111,70 @@ fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut
             format!("The {} cannot be used.", game.inventory[inventory_id].name),
             WHITE,
         );
+    }
+}
+
+// Return the position of a tile left-clicked in player's FOV
+// (optionally in a range), or (None,None) if right-clicked.
+fn target_tile(
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &[Object],
+    max_range: Option<f32>,
+) -> Option<(i32, i32)> {
+    loop {
+        // Check for input event
+        let event = input::check_for_event(input::KEY_PRESS | input::MOUSE).map(|e| e.1);
+        match event {
+            Some(Event::Mouse(m)) => tcod.mouse = m,
+            Some(Event::Key(k)) => tcod.key = k,
+            None => tcod.key = Default::default(),
+        }
+
+        // Render the screen
+        render_all(tcod, game, objects, false);
+
+        // Draw everything on the window at once
+        // This erases the inventory and shows the names of objects under the mouse.
+        tcod.root.flush();
+
+        // Get (x, y) coordinates of the mouse
+        let (x, y) = (tcod.mouse.cx as i32, tcod.mouse.cy as i32);
+
+        // Accept the target if the player clicked in FOV,
+        let in_fov = (x < MAP_WIDTH) && (y < MAP_HEIGHT) && tcod.fov.is_in_fov(x, y);
+        // and in case a range is specified, if it's in that range
+        let in_range = max_range.map_or(true, |range| objects[PLAYER].distance(x, y) <= range);
+        if tcod.mouse.lbutton_pressed && in_fov && in_range {
+            return Some((x, y));
+        }
+
+        // Cancel if the player right-clicked or pressed Escape
+        if tcod.mouse.rbutton_pressed || tcod.key.code == KeyCode::Escape {
+            return None;
+        }
+    }
+}
+
+// Returns a clicked monster inside FOV up to a range, or None if right-clicked
+fn target_monster(
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &[Object],
+    max_range: Option<f32>,
+) -> Option<usize> {
+    loop {
+        match target_tile(tcod, game, objects, max_range) {
+            Some((x, y)) => {
+                // Return the first clicked monster, otherwise continue looping
+                for (id, obj) in objects.iter().enumerate() {
+                    if obj.pos() == (x, y) && obj.fighter.is_some() && id != PLAYER {
+                        return Some(id);
+                    }
+                }
+            }
+            None => return None,
+        }
     }
 }
 
