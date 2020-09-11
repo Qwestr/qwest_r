@@ -996,6 +996,18 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             }
             return PlayerAction::TookTurn;
         },
+        (Key { code: KeyCode::Text, .. }, "d", true) => {
+            // Show the inventory; if an item is selected, drop it
+            let inventory_index = inventory_menu(
+                &game.inventory,
+                "Press the key next to an item to drop it, or any other to cancel.\n'",
+                &mut tcod.root,
+            );
+            if let Some(inventory_index) = inventory_index {
+                drop_item(inventory_index, game, objects);
+            }
+            return PlayerAction::DidntTakeTurn;
+        },
        (Key {
             code: KeyCode::Enter,
             alt: true,
