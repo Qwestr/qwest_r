@@ -1230,12 +1230,13 @@ fn cast_confuse(
     game: &mut Game,
     objects: &mut [Object],
 ) -> UseResult {
-    // Find closest enemy in-range and confuse it
-    let monster_id = closest_monster(tcod, objects, CONFUSE_RANGE);
+    // Ask the player for a target to confuse
+    game.messages.add("Left-click an enemy to confuse it, or right-click to cancel.", LIGHT_CYAN);
+    let monster_id = target_monster(tcod, game, objects, Some(CONFUSE_RANGE as f32));
     if let Some(monster_id) = monster_id {
         let old_ai = objects[monster_id].ai.take().unwrap_or(AI::Basic);
         // Replace the monster's AI with a "confused" one
-        // After some turns it will restore the old AI
+        // that will restore the old AI after some turns
         objects[monster_id].ai = Some(AI::Confused {
             previous_ai: Box::new(old_ai),
             num_turns: CONFUSE_NUM_TURNS,
@@ -1249,8 +1250,8 @@ fn cast_confuse(
         );
         UseResult::UsedUp
     } else {
-        // No enemy fonud within maximum range
-        game.messages.add("No enemy is close enough to strike.", RED);
+        // Cancel the action
+        game.messages.add("Saving it for later, eh?  Good choice!", WHITE);
         UseResult::Cancelled
     }
 }
