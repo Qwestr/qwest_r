@@ -1435,8 +1435,25 @@ fn main_menu(tcod: &mut Tcod) {
         // Show the background image, at twice the regular console resolution
         tcod::image::blit_2x(&img, (0, 0), (-1, -1), &mut tcod.root, (0, 0));
 
+        // Show title/ tag line
+        tcod.root.set_default_foreground(LIGHT_YELLOW);
+        tcod.root.print_ex(
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT / 2 - 4,
+            BackgroundFlag::None,
+            TextAlignment::Center,
+            "QWESTR",
+        );
+        tcod.root.print_ex(
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT - 2,
+            BackgroundFlag::None,
+            TextAlignment::Center,
+            "A game about games, life, and everything in-between",
+        );
+
         // Show options and wait for the player's choice
-        let choices = &["Play a new game", "Continue last game", "Quit"];
+        let choices = &["Play New Game", "Continue Last Game", "Quit"];
         let choice = menu("", choices, 24, &mut tcod.root);
 
         match choice {  
