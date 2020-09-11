@@ -20,6 +20,7 @@ use tcod::colors::{
     RED,
     VIOLET,
     WHITE,
+    YELLOW,
 };
 use tcod::console::{
     self,
@@ -674,6 +675,15 @@ fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
         );
         game.inventory.push(item);
     }
+}
+
+// Drop an item
+fn drop_item(inventory_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    let mut item = game.inventory.remove(inventory_id);
+    item.set_pos(objects[PLAYER].x, objects[PLAYER].y);
+    game.messages
+        .add(format!("You dropped a {}.", item.name), YELLOW);
+    objects.push(item);
 }
 
 fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &mut [Object]) {
