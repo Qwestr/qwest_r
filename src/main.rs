@@ -1317,26 +1317,7 @@ fn cast_fireball(
     UseResult::UsedUp
 }
 
-fn main() {
-    // Define tcod implementation
-    let root = Root::initializer()
-        .font("arial10x10.png", FontLayout::Tcod)
-        .font_type(FontType::Greyscale)
-        .size(SCREEN_WIDTH, SCREEN_HEIGHT)
-        .title("Qwestr")
-        .init();
-    let mut tcod = Tcod {
-        root,
-        con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),
-        panel: Offscreen::new(SCREEN_WIDTH, PANEL_HEIGHT),  
-        fov: FovMap::new(MAP_WIDTH, MAP_HEIGHT),
-        key: Default::default(),
-        mouse: Default::default(),
-    };
-    
-    // Define FPS
-    tcod::system::set_fps(LIMIT_FPS);
-
+fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     // Create the player
     let mut player = Object::new(0, 0, '@', "player", WHITE, true);
 
@@ -1362,6 +1343,42 @@ fn main() {
         inventory: vec![],
     };
 
+    // Initialize FOV map
+    // initialise_fov(tcod, &game.map);
+
+    // Add a warm welcoming message!
+    game.messages.add(
+        "Welcome to Qwestr! Prepare to perish in the Tombs of the Fallen Heroes...",
+        GOLD,
+    );
+
+    // Return game, objects
+    (game, objects)
+}
+
+fn main() {
+    // Define tcod implementation
+    let root = Root::initializer()
+        .font("arial10x10.png", FontLayout::Tcod)
+        .font_type(FontType::Greyscale)
+        .size(SCREEN_WIDTH, SCREEN_HEIGHT)
+        .title("Qwestr")
+        .init();
+    let mut tcod = Tcod {
+        root,
+        con: Offscreen::new(MAP_WIDTH, MAP_HEIGHT),
+        panel: Offscreen::new(SCREEN_WIDTH, PANEL_HEIGHT),  
+        fov: FovMap::new(MAP_WIDTH, MAP_HEIGHT),
+        key: Default::default(),
+        mouse: Default::default(),
+    };
+    
+    // Define FPS
+    tcod::system::set_fps(LIMIT_FPS);
+
+    // New game
+    let (mut game, mut objects) = new_game(&mut tcod);
+
     // Populate the FOV map, according to the generated map
     for y in 0..MAP_HEIGHT {
         for x in 0..MAP_WIDTH {
@@ -1377,12 +1394,6 @@ fn main() {
     // Keep track of player position
     // Force FOV "recompute" first time through the game loop
     let mut previous_player_position = (-1, -1);
-
-    // Add a warm welcoming message!
-    game.messages.add(
-        "Welcome to Qwestr! Prepare to perish in the Tombs of the Fallen Heroes...",
-        GOLD,
-    );
 
     // Setup game loop
     while !tcod.root.window_closed() {
