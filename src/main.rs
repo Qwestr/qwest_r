@@ -11,6 +11,7 @@ use tcod::colors::{
     GREEN,
     LIGHT_GREY,
     LIGHT_RED,
+    LIGHT_VIOLET,
     ORANGE,
     RED,
     VIOLET,
@@ -68,6 +69,9 @@ const MAX_ROOM_ITEMS: i32 = 2;
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
 const FOV_LIGHT_WALLS: bool = true; 
 const TORCH_RADIUS: i32 = 10;
+
+// Game item constants 
+const HEAL_AMOUNT: i32 = 4;
 
 // Wall/ ground colors
 const COLOR_DARK_WALL: Color = Color {
@@ -241,6 +245,16 @@ impl Object {
                 ),
                 WHITE,
             );
+        }
+    }
+
+    // Heal by the given amount, without going over the maximum
+    pub fn heal(&mut self, amount: i32) {
+        if let Some(ref mut fighter) = self.fighter {
+            fighter.hp += amount;
+            if fighter.hp > fighter.max_hp {
+                fighter.hp = fighter.max_hp;
+            }
         }
     }
 
@@ -966,6 +980,26 @@ fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut
             WHITE,
         );
     }
+}
+
+fn cast_heal(
+    _inventory_id: usize,
+    _tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut [Object],
+) -> UseResult {
+    // Heal the player
+    if let Some(fighter) = objects[PLAYER].fighter {
+        if fighter.hp == fighter.max_hp {
+            game.messages.add("You are already at full health.", RED);
+            return UseResult::Cancelled;
+        }
+        game.messages
+            .add("Your wounds start to feel better!", LIGHT_VIOLET);
+        objects[PLAYER].heal(HEAL_AMOUNT);
+        return UseResult::UsedUp;
+    }
+    UseResult::Cancelled
 }
 
 fn main() {
