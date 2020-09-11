@@ -10,6 +10,7 @@ use tcod::colors::{
     GOLD,
     GREEN,
     LIGHT_BLUE,
+    LIGHT_CYAN,
     LIGHT_GREEN,
     LIGHT_GREY,
     LIGHT_RED,
@@ -79,6 +80,8 @@ const LIGHTNING_DAMAGE: i32 = 40;
 const LIGHTNING_RANGE: i32 = 5;
 const CONFUSE_RANGE: i32 = 8;
 const CONFUSE_NUM_TURNS: i32 = 10;
+const FIREBALL_RADIUS: i32 = 3;
+const FIREBALL_DAMAGE: i32 = 12;
 
 // Wall/ ground colors
 const COLOR_DARK_WALL: Color = Color {
@@ -129,6 +132,7 @@ enum Item {
     Heal,
     Lightning,
     Confuse,
+    Fireball,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -482,22 +486,20 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
                 object.item = Some(Item::Heal);
                 object
-            } else if dice < 0.8 {
-                // Create a lightning bolt scroll (20% chance)
-                let mut object = Object::new(
-                    x,
-                    y,
-                    '#',
-                    "scroll of lightning bolt",
-                    LIGHT_YELLOW,
-                    false,
-                );
+            } else if dice < 0.7 {
+                // Create a lightning bolt scroll (10% chance)
+                let mut object = Object::new(x, y, '#', "scroll of lightning bolt", LIGHT_YELLOW, false);
                 object.item = Some(Item::Lightning);
                 object
-            } else {
-                // Create a confuse scroll (20% chance)
+            } else if dice < 0.8 {
+                // Create a confuse scroll (10% chance)
                 let mut object = Object::new(x, y, '#', "scroll of confusion", LIGHT_YELLOW, false);
                 object.item = Some(Item::Confuse);
+                object
+            } else {
+                // Create a fireball scroll (10% chance)
+                let mut object = Object::new(x, y, '#', "scroll of fireball", LIGHT_YELLOW, false);
+                object.item = Some(Item::Fireball);
                 object
             };
 
@@ -1135,6 +1137,7 @@ fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut
             Item::Heal => cast_heal,
             Item::Lightning => cast_lightning,
             Item::Confuse => cast_confuse,
+            Item::Fireball => cast_fireball,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
@@ -1228,6 +1231,45 @@ fn cast_confuse(
         game.messages.add("No enemy is close enough to strike.", RED);
         UseResult::Cancelled
     }
+}
+
+fn cast_fireball(
+    _inventory_id: usize,
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut [Object],
+) -> UseResult {
+    // ask the player for a target tile to throw a fireball at
+    game.messages.add(
+        "Left-click a target tile for the fireball, or right-click to cancel.",
+        LIGHT_CYAN,
+    );
+    let (x, y) = match target_tile(tcod, game, objects, None) {
+        Some(tile_pos) => tile_pos,
+        None => return UseResult::Cancelled,
+    };
+    game.messages.add(
+        format!(
+            "The fireball explodes, burning everything within {} tiles!",
+            FIREBALL_RADIUS
+        ),
+        ORANGE,
+    );
+
+    for obj in objects {
+        if obj.distance(x, y) <= FIREBALL_RADIUS as f32 && obj.fighter.is_some() {
+            game.messages.add(
+                format!(
+                    "The {} gets burned for {} hit points.",
+                    obj.name, FIREBALL_DAMAGE
+                ),
+                ORANGE,
+            );
+            obj.take_damage(FIREBALL_DAMAGE, game);
+        }
+    }
+
+    UseResult::UsedUp
 }
 
 fn main() {
