@@ -10,6 +10,7 @@ use tcod::colors::{
     GOLD,
     GREEN,
     LIGHT_BLUE,
+    LIGHT_GREEN,
     LIGHT_GREY,
     LIGHT_RED,
     LIGHT_VIOLET,
@@ -76,6 +77,8 @@ const TORCH_RADIUS: i32 = 10;
 const HEAL_AMOUNT: i32 = 4;
 const LIGHTNING_DAMAGE: i32 = 40;
 const LIGHTNING_RANGE: i32 = 5;
+const CONFUSE_RANGE: i32 = 8;
+const CONFUSE_NUM_TURNS: i32 = 10;
 
 // Wall/ ground colors
 const COLOR_DARK_WALL: Color = Color {
@@ -125,6 +128,7 @@ enum AI {
 enum Item {
     Heal,
     Lightning,
+    Confuse,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -461,20 +465,20 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
     let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
 
     for _ in 0..num_items {
-        // choose random spot for this item
+        // Choose random spot for this item
         let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
 
         // Only place it if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
             let dice = rand::random::<f32>();
-            let item = if dice < 0.7 {
-                // create a healing potion (70% chance)
+            let item = if dice < 0.6 {
+                // Create a healing potion (60% chance)
                 let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
                 object.item = Some(Item::Heal);
                 object
-            } else {
-                // create a lightning bolt scroll (30% chance)
+            } else if dice < 0.8 {
+                // Create a lightning bolt scroll (20% chance)
                 let mut object = Object::new(
                     x,
                     y,
@@ -485,14 +489,14 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 );
                 object.item = Some(Item::Lightning);
                 object
+            } else {
+                // Create a confuse scroll (20% chance)
+                let mut object = Object::new(x, y, '#', "scroll of confusion", LIGHT_YELLOW, false);
+                object.item = Some(Item::Confuse);
+                object
             };
-            // // Create a healing potion
-            // let mut potion = Object::new(x, y, '!', "healing potion", VIOLET, false);
 
-            // // Set potion components
-            // potion.item = Some(Item::Heal);
-
-            // Add potion to objects list
+            // Add item to objects list
             objects.push(item);
         }
     }
@@ -1083,6 +1087,7 @@ fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut
         let on_use = match item {
             Item::Heal => cast_heal,
             Item::Lightning => cast_lightning,
+            Item::Confuse => cast_confuse,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
@@ -1142,6 +1147,37 @@ fn cast_lightning(
         UseResult::UsedUp
     } else {
         // No enemy found within maximum range
+        game.messages.add("No enemy is close enough to strike.", RED);
+        UseResult::Cancelled
+    }
+}
+
+fn cast_confuse(
+    _inventory_id: usize,
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut [Object],
+) -> UseResult {
+    // Find closest enemy in-range and confuse it
+    let monster_id = closest_monster(tcod, objects, CONFUSE_RANGE);
+    if let Some(monster_id) = monster_id {
+        let old_ai = objects[monster_id].ai.take().unwrap_or(AI::Basic);
+        // Replace the monster's AI with a "confused" one
+        // After some turns it will restore the old AI
+        objects[monster_id].ai = Some(AI::Confused {
+            previous_ai: Box::new(old_ai),
+            num_turns: CONFUSE_NUM_TURNS,
+        });
+        game.messages.add(
+            format!(
+                "The eyes of {} look vacant, as he starts to stumble around!",
+                objects[monster_id].name
+            ),
+            LIGHT_GREEN,
+        );
+        UseResult::UsedUp
+    } else {
+        // No enemy fonud within maximum range
         game.messages.add("No enemy is close enough to strike.", RED);
         UseResult::Cancelled
     }
