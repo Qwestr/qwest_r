@@ -1477,6 +1477,14 @@ fn main_menu(tcod: &mut Tcod) {
     }
 }
 
+/// Save the game
+fn save_game(game: &Game, objects: &[Object]) -> Result<(), Box<dyn Error>> {  
+    let save_data = serde_json::to_string(&(game, objects))?;  
+    let mut file = File::create("savegame")?;  
+    file.write_all(save_data.as_bytes())?;  
+    Ok(())  
+}
+
 fn main() {
     // Define tcod implementation
     let root = Root::initializer()
