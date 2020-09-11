@@ -9,9 +9,11 @@ use tcod::colors::{
     DESATURATED_GREEN,
     GOLD,
     GREEN,
+    LIGHT_BLUE,
     LIGHT_GREY,
     LIGHT_RED,
     LIGHT_VIOLET,
+    LIGHT_YELLOW,
     ORANGE,
     RED,
     VIOLET,
@@ -72,6 +74,8 @@ const TORCH_RADIUS: i32 = 10;
 
 // Game item constants 
 const HEAL_AMOUNT: i32 = 4;
+const LIGHTNING_DAMAGE: i32 = 40;
+const LIGHTNING_RANGE: i32 = 5;
 
 // Wall/ ground colors
 const COLOR_DARK_WALL: Color = Color {
@@ -116,6 +120,7 @@ enum AI {
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Item {
     Heal,
+    Lightning,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -458,14 +463,33 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Only place it if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
-            // Create a healing potion
-            let mut potion = Object::new(x, y, '!', "healing potion", VIOLET, false);
+            let dice = rand::random::<f32>();
+            let item = if dice < 0.7 {
+                // create a healing potion (70% chance)
+                let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
+                object.item = Some(Item::Heal);
+                object
+            } else {
+                // create a lightning bolt scroll (30% chance)
+                let mut object = Object::new(
+                    x,
+                    y,
+                    '#',
+                    "scroll of lightning bolt",
+                    LIGHT_YELLOW,
+                    false,
+                );
+                object.item = Some(Item::Lightning);
+                object
+            };
+            // // Create a healing potion
+            // let mut potion = Object::new(x, y, '!', "healing potion", VIOLET, false);
 
-            // Set potion components
-            potion.item = Some(Item::Heal);
+            // // Set potion components
+            // potion.item = Some(Item::Heal);
 
             // Add potion to objects list
-            objects.push(potion);
+            objects.push(item);
         }
     }
 }
@@ -586,6 +610,35 @@ fn player_move_or_attack(dx: i32, dy: i32, game: &mut Game, objects: &mut [Objec
             move_by(PLAYER, dx, dy, &game.map, objects);
         }
     }
+}
+
+// Find closest enemy, up to a maximum range, and in the player's FOV
+fn closest_monster(tcod: &Tcod, objects: &[Object], max_range: i32) -> Option<usize> {
+    let mut closest_monster = None;
+
+    // Start with (slightly more than) maximum range
+    let mut closest_dist = (max_range + 1) as f32; 
+
+    // Iterate through objects
+    for (id, object) in objects.iter().enumerate() {
+        // Check if this is a valid monster object
+        if (id != PLAYER)
+            && object.fighter.is_some()
+            && object.ai.is_some()
+            && tcod.fov.is_in_fov(object.x, object.y)
+        {
+            // Calculate distance between this object and the player
+            let dist = objects[PLAYER].distance_to(object);
+            if dist < closest_dist {
+                // It's closer, so remember it
+                closest_monster = Some(id);
+                closest_dist = dist;
+            }
+        }
+    }
+
+    // Return closest monster
+    closest_monster
 }
 
 // Add to the player's inventory and remove from the map
@@ -945,7 +998,7 @@ fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root)
 }
 
 fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option<usize> {
-    // how a menu with each item of the inventory as an option
+    // Show a menu with each item of the inventory as an option
     let options = if inventory.len() == 0 {
         vec!["Inventory is empty.".into()]
     } else {
@@ -954,7 +1007,7 @@ fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option
 
     let inventory_index = menu(header, &options, INVENTORY_WIDTH, root);
 
-    // if an item was chosen, return it
+    // If an item was chosen, return it
     if inventory.len() > 0 {
         inventory_index
     } else {
@@ -963,11 +1016,11 @@ fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option
 }
 
 fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
-    use Item::*;
     // Just call the "use_function" if it is defined
     if let Some(item) = game.inventory[inventory_id].item {
         let on_use = match item {
-            Heal => cast_heal,
+            Item::Heal => cast_heal,
+            Item::Lightning => cast_lightning,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
@@ -998,12 +1051,38 @@ fn cast_heal(
             game.messages.add("You are already at full health.", RED);
             return UseResult::Cancelled;
         }
-        game.messages
-            .add("Your wounds start to feel better!", LIGHT_VIOLET);
+        game.messages.add("Your wounds start to feel better!", LIGHT_VIOLET);
         objects[PLAYER].heal(HEAL_AMOUNT);
         return UseResult::UsedUp;
     }
     UseResult::Cancelled
+}
+
+fn cast_lightning(
+    _inventory_id: usize,
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut [Object],
+) -> UseResult {
+    // Find closest enemy (inside a maximum range and damage it)
+    let monster_id = closest_monster(tcod, objects, LIGHTNING_RANGE);
+    if let Some(monster_id) = monster_id {
+        // Zap it!
+        game.messages.add(
+            format!(
+                "A lightning bolt strikes the {} with a loud thunder! \
+                 The damage is {} hit points.",
+                objects[monster_id].name, LIGHTNING_DAMAGE
+            ),
+            LIGHT_BLUE,
+        );
+        objects[monster_id].take_damage(LIGHTNING_DAMAGE, game);
+        UseResult::UsedUp
+    } else {
+        // No enemy found within maximum range
+        game.messages.add("No enemy is close enough to strike.", RED);
+        UseResult::Cancelled
+    }
 }
 
 fn main() {
