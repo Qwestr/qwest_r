@@ -1424,6 +1424,36 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
     }
 }
 
+/// Initialize the main menu of the game
+fn main_menu(tcod: &mut Tcod) {
+    // Load menu background image
+    let img = tcod::image::Image::from_file("menu_background.png") 
+        .ok()
+        .expect("Background image not found");  
+
+    while !tcod.root.window_closed() {  
+        // Show the background image, at twice the regular console resolution
+        tcod::image::blit_2x(&img, (0, 0), (-1, -1), &mut tcod.root, (0, 0));
+
+        // Show options and wait for the player's choice
+        let choices = &["Play a new game", "Continue last game", "Quit"];
+        let choice = menu("", choices, 24, &mut tcod.root);
+
+        match choice {  
+            Some(0) => {
+                // New game
+                let (mut game, mut objects) = new_game(tcod);
+                play_game(tcod, &mut game, &mut objects);
+            }
+            Some(2) => {
+                // quit
+                break;
+            }
+            _ => {}  
+        }
+    }
+}
+
 fn main() {
     // Define tcod implementation
     let root = Root::initializer()
