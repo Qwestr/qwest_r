@@ -130,6 +130,11 @@ impl DeathCallback {
     }
 }
 
+enum UseResult {
+    UsedUp,
+    Cancelled,
+}
+
 struct Messages {
     messages: Vec<(String, Color)>,
 }
@@ -936,6 +941,30 @@ fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option
         inventory_index
     } else {
         None
+    }
+}
+
+fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
+    use Item::*;
+    // Just call the "use_function" if it is defined
+    if let Some(item) = game.inventory[inventory_id].item {
+        let on_use = match item {
+            Heal => cast_heal,
+        };
+        match on_use(inventory_id, tcod, game, objects) {
+            UseResult::UsedUp => {
+                // destroy after use, unless it was cancelled for some reason
+                game.inventory.remove(inventory_id);
+            }
+            UseResult::Cancelled => {
+                game.messages.add("Cancelled", WHITE);
+            }
+        }
+    } else {
+        game.messages.add(
+            format!("The {} cannot be used.", game.inventory[inventory_id].name),
+            WHITE,
+        );
     }
 }
 
