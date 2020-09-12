@@ -1102,6 +1102,11 @@ fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root)
     }
 }
 
+fn message_box(text: &str, width: i32, root: &mut Root) {
+    let options: &[&str] = &[];
+    menu(text, options, width, root);
+}
+
 fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option<usize> {
     // Show a menu with each item of the inventory as an option
     let options = if inventory.len() == 0 {
