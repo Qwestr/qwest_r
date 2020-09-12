@@ -1488,8 +1488,8 @@ fn main_menu(tcod: &mut Tcod) {
                         play_game(tcod, &mut game, &mut objects);
                     }
                     Err(_e) => {
-                        println!("No saved game to load!");
-                        // msgbox("\nNo saved game to load.\n", 24, &mut tcod.root);
+                        // Print error message to message box
+                        message_box("\nNo saved game to load.\n", 24, &mut tcod.root);
                         continue;
                     }
                 }
