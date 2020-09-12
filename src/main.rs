@@ -470,43 +470,48 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 },
             ];
 
-            // Get monster choice
+            // Create monster choice generator
             let monster_choice = WeightedChoice::new(monster_chances);
+
             // Generate the monster
-            let mut monster = if rand::random::<f32>() < 0.8 {
-                // Create an orc (80% chance)
-                let mut orc = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
-                
-                // Set orc components
-                orc.fighter = Some(Fighter {
-                    max_hp: 10,
-                    hp: 10,
-                    defense: 0,
-                    power: 3,
-                    xp: 35,
-                    on_death: DeathCallback::Monster,
-                });
-                orc.ai = Some(AI::Basic);
-                
-                // Return the orc
-                orc
-            } else {
-                // Create a troll (20% chance)
-                let mut troll = Object::new(x, y, 'T', "troll", DARKER_GREEN, true);
+            let mut monster = match monster_choice.ind_sample(&mut rand::thread_rng()) {
+                "orc" => {
+                    // Create an orc
+                    let mut orc = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
+                    
+                    // Set orc components
+                    orc.fighter = Some(Fighter {
+                        max_hp: 10,
+                        hp: 10,
+                        defense: 0,
+                        power: 3,
+                        xp: 35,
+                        on_death: DeathCallback::Monster,
+                    });
+                    orc.ai = Some(AI::Basic);
+                    
+                    // Return the orc
+                    orc
+                }
+                "troll" => {
+                    // Create a troll
+                    let mut troll = Object::new(x, y, 'T', "troll", DARKER_GREEN, true);
 
-                // Set troll components
-                troll.fighter = Some(Fighter {
-                    max_hp: 16,
-                    hp: 16,
-                    defense: 1,
-                    power: 4,
-                    xp: 100,
-                    on_death: DeathCallback::Monster,
-                });
-                troll.ai = Some(AI::Basic);
+                    // Set troll components
+                    troll.fighter = Some(Fighter {
+                        max_hp: 16,
+                        hp: 16,
+                        defense: 1,
+                        power: 4,
+                        xp: 100,
+                        on_death: DeathCallback::Monster,
+                    });
+                    troll.ai = Some(AI::Basic);
 
-                // Return the troll
-                troll
+                    // Return the troll
+                    troll
+                }
+                _ => unreachable!(),
             };
 
             // Give the monster life!
