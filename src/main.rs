@@ -491,7 +491,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         // Only place it if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
             let dice = rand::random::<f32>();
-            let item = if dice < 0.6 {
+            let mut item = if dice < 0.6 {
                 // Create a healing potion (60% chance)
                 let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
                 object.item = Some(Item::Heal);
@@ -512,6 +512,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 object.item = Some(Item::Fireball);
                 object
             };
+            // Set item to be always visible once found
+            item.always_visible = true;
 
             // Add item to objects list
             objects.push(item);
