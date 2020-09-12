@@ -1,5 +1,9 @@
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 use std::cmp;
+use std::error::Error;
+use std::fs::File;
+use std::io::{Read, Write};
 use tcod::colors::{
     Color,
     BLACK,
@@ -119,7 +123,7 @@ enum PlayerAction {
     Exit,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum AI {
     Basic,
     Confused {
@@ -128,7 +132,7 @@ enum AI {
     },
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 enum Item {
     Heal,
     Lightning,
@@ -136,7 +140,7 @@ enum Item {
     Fireball,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 enum DeathCallback {
     Player,
     Monster,
@@ -157,6 +161,7 @@ enum UseResult {
     Cancelled,
 }
 
+#[derive(Serialize, Deserialize)]
 struct Messages {
     messages: Vec<(String, Color)>,
 }
@@ -179,7 +184,7 @@ impl Messages {
 
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Object {
     x: i32,
     y: i32,
@@ -289,7 +294,7 @@ impl Object {
 }
 
 // Combat-related properties and methods (monster, player, NPC).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 struct Fighter {
     max_hp: i32,
     hp: i32,
@@ -334,7 +339,7 @@ impl Rect {
 }
 
 // A tile of the map and its properties
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 struct Tile {
     blocked: bool,
     explored: bool,
@@ -363,6 +368,7 @@ impl Tile {
 type Map = Vec<Vec<Tile>>;
 
 // Game struct
+#[derive(Serialize, Deserialize)]
 struct Game {
     map: Map,
     messages: Messages,
@@ -1412,8 +1418,9 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         // Get player action
         let player_action = handle_keys(tcod, game, objects);
 
-        // Exit the game if Exit action was taken
+        // Save & Exit the game if Exit action was taken
         if player_action == PlayerAction::Exit {
+            save_game(game, objects).unwrap();
             break;
         }
 
