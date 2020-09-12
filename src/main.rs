@@ -88,6 +88,13 @@ const CONFUSE_NUM_TURNS: i32 = 10;
 const FIREBALL_RADIUS: i32 = 3;
 const FIREBALL_DAMAGE: i32 = 12;
 
+// Player will always be the first object
+const PLAYER: usize = 0;
+
+// Experience and level-ups
+const LEVEL_UP_BASE: i32 = 200;
+const LEVEL_UP_FACTOR: i32 = 150;
+
 // Wall/ ground colors
 const COLOR_DARK_WALL: Color = Color {
     r: 0,
@@ -112,10 +119,6 @@ const COLOR_LIGHT_GROUND: Color = Color {
 
 // 20 frames-per-second maximum
 const LIMIT_FPS: i32 = 20;
-
-// Player will always be the first object
-const PLAYER: usize = 0;
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum PlayerAction {
     TookTurn,
