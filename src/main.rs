@@ -197,6 +197,7 @@ struct Object {
     fighter: Option<Fighter>,  
     ai: Option<AI>,
     item: Option<Item>,
+    level: i32,
 }
 
 impl Object {
@@ -213,6 +214,7 @@ impl Object {
             fighter: None,  
             ai: None,
             item: None,
+            level: 1,
         }
     }
 
