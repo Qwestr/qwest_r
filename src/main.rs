@@ -1,3 +1,4 @@
+use rand::distributions::{IndependentSample, Weighted, WeightedChoice};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::cmp;
@@ -457,6 +458,20 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Check if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
+            // Create monster random table
+            let monster_chances = &mut [
+                Weighted {
+                    weight: 80,
+                    item: "orc",
+                },
+                Weighted {
+                    weight: 20,
+                    item: "troll",
+                },
+            ];
+
+            // Get monster choice
+            let monster_choice = WeightedChoice::new(monster_chances);
             // Generate the monster
             let mut monster = if rand::random::<f32>() < 0.8 {
                 // Create an orc (80% chance)
