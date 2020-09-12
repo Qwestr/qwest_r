@@ -1292,7 +1292,7 @@ fn cast_lightning(
     game: &mut Game,
     objects: &mut [Object],
 ) -> UseResult {
-    // Find closest enemy (inside a maximum range and damage it)
+    // Find closest enemy (inside a maximum range)
     let monster_id = closest_monster(tcod, objects, LIGHTNING_RANGE);
     if let Some(monster_id) = monster_id {
         // Zap it!
@@ -1304,11 +1304,20 @@ fn cast_lightning(
             ),
             LIGHT_BLUE,
         );
-        objects[monster_id].take_damage(LIGHTNING_DAMAGE, game);
+        
+        // Assign damage to target and check if xp is returned for killing target
+        if let Some(xp) = objects[monster_id].take_damage(LIGHTNING_DAMAGE, game) {
+            // Yield experience to the player
+            objects[PLAYER].fighter.as_mut().unwrap().xp += xp;
+        }
+
+        // Return UsedUp result
         UseResult::UsedUp
     } else {
         // No enemy found within maximum range
         game.messages.add("No enemy is close enough to strike.", RED);
+
+        // Return Cancelled result
         UseResult::Cancelled
     }
 }
@@ -1368,8 +1377,11 @@ fn cast_fireball(
         ORANGE,
     );
 
-    for obj in objects {
+    // Create a counter to keep track of xp gained (if any)
+    let mut xp_to_gain = 0;
+    for (id, obj) in objects.iter_mut().enumerate() {
         if obj.distance(x, y) <= FIREBALL_RADIUS as f32 && obj.fighter.is_some() {
+            // Create attack success message
             game.messages.add(
                 format!(
                     "The {} gets burned for {} hit points.",
@@ -1377,10 +1389,21 @@ fn cast_fireball(
                 ),
                 ORANGE,
             );
-            obj.take_damage(FIREBALL_DAMAGE, game);
+
+            // Assign damage to target and check if xp is returned for killing target
+            if let Some(xp) = obj.take_damage(FIREBALL_DAMAGE, game) {
+                // Don't reward the player for burning (and killing) themself!
+                if id != PLAYER {                    
+                    xp_to_gain += xp;
+                }
+            }
         }
     }
 
+    // Yield experience to the player
+    objects[PLAYER].fighter.as_mut().unwrap().xp += xp_to_gain;
+
+    // Return UsedUp result
     UseResult::UsedUp
 }
 
