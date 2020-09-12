@@ -1520,6 +1520,9 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
                 }
             }
         }
+
+        // Level up if needed
+        level_up(tcod, game, objects);
     }
 }
 
