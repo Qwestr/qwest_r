@@ -375,6 +375,7 @@ struct Game {
     map: Map,
     messages: Messages,
     inventory: Vec<Object>,
+    dungeon_level: u32,
 }
 
 // Tcod struct
@@ -521,6 +522,11 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 fn make_map(objects: &mut Vec<Object>) -> Map {
     // Fill map with "blocked" tiles
     let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
+
+    // Player is the first element, remove everything else.
+    // NOTE: works only when the player is the first object!
+    assert_eq!(&objects[PLAYER] as *const _, &objects[0] as *const _);
+    objects.truncate(1);
 
     // Create rooms vector
     let mut rooms = vec![];
@@ -1030,7 +1036,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             }
             return PlayerAction::DidntTakeTurn;
         }
-        (Key { code: Text, .. }, "<", true) => {
+        (Key { code: KeyCode::Text, .. }, "<", true) => {
             // Go down stairs, if the player is on them
             let player_on_stairs = objects
                 .iter()
@@ -1377,6 +1383,7 @@ fn new_game() -> (Game, Vec<Object>) {
         map: make_map(&mut objects),
         messages: Messages::new(),
         inventory: vec![],
+        dungeon_level: 1,
     };
 
     // Add a warm welcoming message!
@@ -1472,12 +1479,19 @@ fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
     let heal_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp / 2);
     objects[PLAYER].heal(heal_hp);
 
+    // Show next level message
     game.messages.add(
         "After a rare moment of peace, you descend deeper into the heart of the dungeon...",
         RED,
     );
+
+    // Increase dungeon level
     game.dungeon_level += 1;
+
+    // Make new map for level
     game.map = make_map(objects);
+
+    // Initialize FOV
     initialise_fov(tcod, &game.map);
 }
 
