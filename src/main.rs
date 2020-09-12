@@ -1550,6 +1550,29 @@ fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
     initialise_fov(tcod, &game.map);
 }
 
+/// Promote a character to the next level
+fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
+    // Get player object
+    let player = &mut objects[PLAYER];
+
+    // Determine how much xp is required for the next level
+    let level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
+    
+    // See if the player's xp is enough to level-up
+    if player.fighter.as_ref().map_or(0, |f| f.xp) >= level_up_xp {
+        // It is! Create Level-Up message
+        player.level += 1;
+        game.messages.add(
+            format!(
+                "Your battle skills grow stronger! You reached level {}!",
+                player.level
+            ),
+            YELLOW,
+        );
+        // ... TODO increase players's stats!
+    }
+}
+
 /// Initialize the main menu of the game
 fn main_menu(tcod: &mut Tcod) {
     // Load menu background image
