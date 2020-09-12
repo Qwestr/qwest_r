@@ -966,19 +966,19 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
         (Key { code: KeyCode::Up, .. }, _, true) => {
             player_move_or_attack(0, -1, game, objects);
             return PlayerAction::TookTurn;
-        },
+        }
         (Key {code: KeyCode::Down, .. }, _, true) => {
             player_move_or_attack(0, 1, game, objects);
             return PlayerAction::TookTurn;
-        },
+        }
         (Key { code: KeyCode::Left, .. }, _, true) => {
             player_move_or_attack(-1, 0, game, objects);
             return PlayerAction::TookTurn;
-        },
+        }
         (Key { code: KeyCode::Right, .. }, _, true) => {
             player_move_or_attack(1, 0, game, objects);
             return PlayerAction::TookTurn;
-        },
+        }
         (Key { code: KeyCode::Text, .. }, "g", true) => {
             // Pick up an item
             let item_id = objects
@@ -988,7 +988,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
                 pick_item_up(item_id, game, objects);
             }
             return PlayerAction::DidntTakeTurn;
-        },
+        }
         (Key { code: KeyCode::Text, .. }, "i", true) => {
             // Show the inventory
             let inventory_index = inventory_menu(
@@ -1001,7 +1001,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
                 use_item(inventory_index, tcod, game, objects);
             }
             return PlayerAction::TookTurn;
-        },
+        }
         (Key { code: KeyCode::Text, .. }, "d", true) => {
             // Show the inventory; if an item is selected, drop it
             let inventory_index = inventory_menu(
@@ -1013,7 +1013,7 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
                 drop_item(inventory_index, game, objects);
             }
             return PlayerAction::DidntTakeTurn;
-        },
+        }
        (Key {
             code: KeyCode::Enter,
             alt: true,
@@ -1205,7 +1205,7 @@ fn target_monster(
                     }
                 }
             }
-            None => return None,
+            None => return None
         }
     }
 }
@@ -1328,7 +1328,7 @@ fn cast_fireball(
 }
 
 /// Start a new game
-fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
+fn new_game() -> (Game, Vec<Object>) {
     // Create the player
     let mut player = Object::new(0, 0, '@', "player", WHITE, true);
 
@@ -1353,9 +1353,6 @@ fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         messages: Messages::new(),
         inventory: vec![],
     };
-
-    // Initialize FOV map
-    initialise_fov(tcod, &game.map);
 
     // Add a warm welcoming message!
     game.messages.add(
@@ -1384,6 +1381,9 @@ fn initialise_fov(tcod: &mut Tcod, map: &Map) {
 
 /// Play the game
 fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    // Initialize FOV
+    initialise_fov(tcod, &game.map);
+
     // Keep track of player position
     // Force FOV "recompute" first time through the game loop
     let mut previous_player_position = (-1, -1);
@@ -1470,10 +1470,24 @@ fn main_menu(tcod: &mut Tcod) {
         match choice {  
             Some(0) => {
                 // Create a new game
-                let (mut game, mut objects) = new_game(tcod);
+                let (mut game, mut objects) = new_game();
 
                 // Play the game!
                 play_game(tcod, &mut game, &mut objects);
+            }
+            Some(1) => {
+                // Load game
+                match load_game() {
+                    Ok((mut game, mut objects)) => {
+                        // Play the game!
+                        play_game(tcod, &mut game, &mut objects);
+                    }
+                    Err(_e) => {
+                        println!("No saved game to load!");
+                        // msgbox("\nNo saved game to load.\n", 24, &mut tcod.root);
+                        continue;
+                    }
+                }
             }
             Some(2) => {
                 // Quit
