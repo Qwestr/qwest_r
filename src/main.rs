@@ -269,7 +269,11 @@ impl Object {
                 ),
                 WHITE,
             );
-            target.take_damage(damage, game);
+            // Assign damage to target and check if xp is returned for killing target
+            if let Some(xp) = target.take_damage(damage, game) {
+                // Yield experience to the player
+                self.fighter.as_mut().unwrap().xp += xp;
+            }
         } else {
             game.messages.add(
                 format!(
