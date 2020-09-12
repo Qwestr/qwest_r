@@ -816,7 +816,14 @@ fn player_death(player: &mut Object, game: &mut Game) {
 fn monster_death(monster: &mut Object, game: &mut Game) {
     // Transform it into a nasty corpse!
     // It doesn't block, can't be attacked and doesn't move
-    game.messages.add(format!("{} is dead!", monster.name), ORANGE);
+    game.messages.add(
+        format!(
+            "{} is dead! You gain {} experience points.",
+            monster.name,
+            monster.fighter.unwrap().xp
+        ),
+        ORANGE,
+    );
     monster.char = '%';
     monster.color = DARK_RED;
     monster.blocks = false;
@@ -1018,21 +1025,41 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     // Determine which key was pressed
     match (tcod.key, tcod.key.text(), player_alive) {
         // Movement keys
-        (Key { code: KeyCode::Up, .. }, _, true) => {
+        (Key { code: KeyCode::Up, .. }, _, true) | (Key { code: KeyCode::NumPad8, .. }, _, true) => {
             player_move_or_attack(0, -1, game, objects);
-            return PlayerAction::TookTurn;
+            return PlayerAction::TookTurn
         }
-        (Key {code: KeyCode::Down, .. }, _, true) => {
+        (Key { code: KeyCode::Down, .. }, _, true) | (Key { code: KeyCode::NumPad2, .. }, _, true) => {
             player_move_or_attack(0, 1, game, objects);
-            return PlayerAction::TookTurn;
+            return PlayerAction::TookTurn
         }
-        (Key { code: KeyCode::Left, .. }, _, true) => {
+        (Key { code: KeyCode::Left, .. }, _, true) | (Key { code: KeyCode::NumPad4, .. }, _, true) => {
             player_move_or_attack(-1, 0, game, objects);
             return PlayerAction::TookTurn;
         }
-        (Key { code: KeyCode::Right, .. }, _, true) => {
+        (Key { code: KeyCode::Right, .. }, _, true) | (Key { code: KeyCode::NumPad6, .. }, _, true) => {
             player_move_or_attack(1, 0, game, objects);
             return PlayerAction::TookTurn;
+        }
+        (Key { code: KeyCode::Home, .. }, _, true) | (Key { code: KeyCode::NumPad7, .. }, _, true) => {
+            player_move_or_attack(-1, -1, game, objects);
+            return PlayerAction::TookTurn;
+        }
+        (Key { code: KeyCode::PageUp, .. }, _, true) | (Key { code: KeyCode::NumPad9, .. }, _, true) => {
+            player_move_or_attack(1, -1, game, objects);
+            return PlayerAction::TookTurn;
+        }
+        (Key { code: KeyCode::End, .. }, _, true) | (Key { code: KeyCode::NumPad1, .. }, _, true) => {
+            player_move_or_attack(-1, 1, game, objects);
+            return PlayerAction::TookTurn;
+        }
+        (Key { code: KeyCode::PageDown, .. }, _, true) | (Key { code: KeyCode::NumPad3, .. }, _, true) => {
+            player_move_or_attack(1, 1, game, objects);
+            return PlayerAction::TookTurn;
+        }
+        (Key { code: KeyCode::NumPad5, .. }, _, true) => {
+            // Sleep, i.e. don't moave, wait for the monster(s) to come to you
+            return PlayerAction::TookTurn; 
         }
         (Key { code: KeyCode::Text, .. }, "g", true) => {
             // Pick up an item
