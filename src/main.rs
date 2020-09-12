@@ -232,7 +232,7 @@ impl Object {
         ((dx.pow(2) + dy.pow(2)) as f32).sqrt()
     }
 
-    pub fn take_damage(&mut self, damage: i32, game: &mut Game) {
+    pub fn take_damage(&mut self, damage: i32, game: &mut Game) -> Option<i32> {
         // Apply damage if possible
         if let Some(fighter) = self.fighter.as_mut() {
             if damage > 0 {
@@ -240,13 +240,21 @@ impl Object {
             }
         }
 
-        // Check for death, call the death function
+        // Check for death
         if let Some(fighter) = self.fighter {
             if fighter.hp <= 0 {
                 self.alive = false;
+
+                // Call the death function
                 fighter.on_death.callback(self, game);
+
+                // Return xp for killed fighter
+                return Some(fighter.xp);
             }
         }
+
+        // Return None if fighter was not killed
+        None
     }
 
     pub fn attack(&mut self, target: &mut Object, game: &mut Game) {
