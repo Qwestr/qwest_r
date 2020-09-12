@@ -905,7 +905,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     tcod.panel.set_default_background(BLACK);
     tcod.panel.clear();
 
-    // Render the player's stats
+    // Render the player's stats (HP, etc.)
     let hp = objects[PLAYER].fighter.map_or(0, |f| f.hp);
     let max_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp);
     render_bar(
@@ -918,6 +918,15 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         max_hp,
         LIGHT_RED,
         DARKER_RED
+    );
+
+    // Render dungeon information (lvl, etc.)
+    tcod.panel.print_ex(
+        1,
+        3,
+        BackgroundFlag::None,
+        TextAlignment::Left,
+        format!("Dungeon level: {}", game.dungeon_level),
     );
 
     // Render the names of objects under the mouse
