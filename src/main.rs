@@ -1486,10 +1486,35 @@ fn main_menu(tcod: &mut Tcod) {
 
 /// Save the game
 fn save_game(game: &Game, objects: &[Object]) -> Result<(), Box<dyn Error>> {  
-    let save_data = serde_json::to_string(&(game, objects))?;  
-    let mut file = File::create("savegame")?;  
-    file.write_all(save_data.as_bytes())?;  
+    // Serialize game/ object data to json
+    let save_data = serde_json::to_string(&(game, objects))?;
+
+    // Create a save file  
+    let mut file = File::create("savegame")?; 
+    
+    // Write to the save file
+    file.write_all(save_data.as_bytes())?;
+    
+    // Return successful result
     Ok(())  
+}
+
+/// Load the last saved game
+fn load_game() -> Result<(Game, Vec<Object>), Box<dyn Error>> {
+    // Prepare save state string
+    let mut json_save_state = String::new();
+
+    // Open save file
+    let mut file = File::open("savegame")?;
+
+    // Read file to save state string
+    file.read_to_string(&mut json_save_state)?;
+
+    // Deserialize string to game/ object data
+    let result = serde_json::from_str::<(Game, Vec<Object>)>(&json_save_state)?;
+
+    // Return successful result
+    Ok(result)
 }
 
 fn main() {
