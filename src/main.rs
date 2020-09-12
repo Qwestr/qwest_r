@@ -875,8 +875,10 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
             || (o.always_visible && game.map[o.x as usize][o.y as usize].explored)
         })
         .collect();
+    
     // Sort so that non-blocking objects come first
     to_draw.sort_by(|o1, o2| { o1.blocks.cmp(&o2.blocks) });
+    
     // Draw the objects in the list
     for object in &to_draw {
         object.draw(&mut tcod.con);
@@ -1028,13 +1030,17 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             }
             return PlayerAction::DidntTakeTurn;
         }
-       (Key {
-            code: KeyCode::Enter,
-            alt: true,
-            ..
-        },
-        _,
-        _,) => {
+        (Key { code: Text, .. }, "<", true) => {
+            // Go down stairs, if the player is on them
+            let player_on_stairs = objects
+                .iter()
+                .any(|object| object.pos() == objects[PLAYER].pos() && object.name == "stairs");
+            if player_on_stairs {
+                next_level(tcod, game, objects);
+            }
+            return PlayerAction::DidntTakeTurn;
+        }
+        (Key { code: KeyCode::Enter, alt: true, .. }, _, _,) => {
             // Alt+Enter: toggle fullscreen
             let fullscreen = tcod.root.is_fullscreen();
             tcod.root.set_fullscreen(!fullscreen);
@@ -1452,6 +1458,27 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
             }
         }
     }
+}
+
+/// Advance to the next level
+fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    // Show end level message
+    game.messages.add(
+        "You take a moment to rest, and recover your strength.",
+        VIOLET,
+    );
+
+    // Heal up to half of the player's max hp
+    let heal_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp / 2);
+    objects[PLAYER].heal(heal_hp);
+
+    game.messages.add(
+        "After a rare moment of peace, you descend deeper into the heart of the dungeon...",
+        RED,
+    );
+    game.dungeon_level += 1;
+    game.map = make_map(objects);
+    initialise_fov(tcod, &game.map);
 }
 
 /// Initialize the main menu of the game
