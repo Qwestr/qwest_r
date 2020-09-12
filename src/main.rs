@@ -58,6 +58,7 @@ const PANEL_HEIGHT: i32 = 7;
 const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 const INVENTORY_WIDTH: i32 = 50;
 const LEVEL_SCREEN_WIDTH: i32 = 40;
+const CHARACTER_SCREEN_WIDTH: i32 = 30;
 
 // Message log GUI constants
 const MSG_X: i32 = BAR_WIDTH + 2;
@@ -1078,6 +1079,28 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             }
             return PlayerAction::DidntTakeTurn;
         }
+        (Key { code: KeyCode::Text, .. }, "c", true) => {
+            // Show character information
+            let player = &objects[PLAYER];
+            let level = player.level;
+            let level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
+            if let Some(fighter) = player.fighter.as_ref() {
+                let msg = format!(
+                    "Character Information
+        
+Level: {}
+Experience: {}
+Experience to level up: {}
+
+Maximum HP: {}
+Attack: {}
+Defense: {}", level, fighter.xp, level_up_xp, fighter.max_hp, fighter.power, fighter.defense);
+
+                // Show message box
+                message_box(&msg, CHARACTER_SCREEN_WIDTH, &mut tcod.root);
+            }  
+            return PlayerAction::DidntTakeTurn;
+        }
         (Key { code: KeyCode::Enter, alt: true, .. }, _, _,) => {
             // Alt+Enter: toggle fullscreen
             let fullscreen = tcod.root.is_fullscreen();
@@ -1496,6 +1519,9 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         
         // Draw everything on the window at once
         tcod.root.flush();
+
+        // Level up if needed
+        level_up(tcod, game, objects);
         
         // Get player object
         let player = &mut objects[0];
@@ -1520,9 +1546,6 @@ fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
                 }
             }
         }
-
-        // Level up if needed
-        level_up(tcod, game, objects);
     }
 }
 
