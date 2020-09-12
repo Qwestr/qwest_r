@@ -57,6 +57,7 @@ const BAR_WIDTH: i32 = 20;
 const PANEL_HEIGHT: i32 = 7;
 const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 const INVENTORY_WIDTH: i32 = 50;
+const LEVEL_SCREEN_WIDTH: i32 = 40;
 
 // Message log GUI constants
 const MSG_X: i32 = BAR_WIDTH + 2;
@@ -1569,7 +1570,44 @@ fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
             ),
             YELLOW,
         );
-        // ... TODO increase players's stats!
+        // Increase players's stats
+        let fighter = player.fighter.as_mut().unwrap();
+        let mut choice = None;
+        while choice.is_none() {
+            // Keep asking until a choice is made
+            choice = menu(
+                "Level up! Choose a stat to raise:\n",
+                &[
+                    format!("Constitution (+20 HP, from {})", fighter.max_hp),
+                    format!("Strength (+1 attack, from {})", fighter.power),
+                    format!("Agility (+1 defense, from {})", fighter.defense),
+                ],
+                LEVEL_SCREEN_WIDTH,
+                &mut tcod.root,
+            );
+        }
+
+        // Remove xp required to level up from the player
+        // (resetting to 0 would make the player lose xp over the required amount)
+        fighter.xp -= level_up_xp;
+        
+        // Upgrade the character based on their choice
+        match choice.unwrap() {
+            0 => {
+                // Constitution
+                fighter.max_hp += 20;
+                fighter.hp += 20;
+            }
+            1 => {
+                // Strength
+                fighter.power += 1;
+            }
+            2 => {
+                // Agility
+                fighter.defense += 1;
+            }
+            _ => unreachable!(),
+        }
     }
 }
 
