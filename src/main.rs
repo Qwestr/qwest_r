@@ -193,6 +193,7 @@ struct Object {
     blocks: bool,  
     alive: bool,
     name: String,
+    always_visible: bool,
     fighter: Option<Fighter>,  
     ai: Option<AI>,
     item: Option<Item>,
@@ -207,6 +208,7 @@ impl Object {
             color,
             blocks,
             alive: false,
+            always_visible: false,
             name: name.into(),
             fighter: None,  
             ai: None,
@@ -576,6 +578,12 @@ fn make_map(objects: &mut Vec<Object>) -> Map {
         }
     }
 
+    // Create stairs at the center of the last room
+    let (last_room_x, last_room_y) = rooms[rooms.len() - 1].center();
+    let mut stairs = Object::new(last_room_x, last_room_y, '<', "stairs", WHITE, false);
+    stairs.always_visible = true;
+    objects.push(stairs);
+
     // Return the map
     map
 }
@@ -859,8 +867,14 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
         }
     }
 
-    // Get all objects in FOV
-    let mut to_draw: Vec<_> = objects.iter().filter(|o| tcod.fov.is_in_fov(o.x, o.y)).collect();
+    // Get all objects in FOV (and objects that are always visible once explored)
+    let mut to_draw: Vec<_> = objects
+        .iter()
+        .filter(|o| {
+            tcod.fov.is_in_fov(o.x, o.y)
+            || (o.always_visible && game.map[o.x as usize][o.y as usize].explored)
+        })
+        .collect();
     // Sort so that non-blocking objects come first
     to_draw.sort_by(|o1, o2| { o1.blocks.cmp(&o2.blocks) });
     // Draw the objects in the list
