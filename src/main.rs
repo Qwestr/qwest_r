@@ -503,10 +503,10 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     
                     // Set orc components
                     object.fighter = Some(Fighter {
-                        max_hp: 10,
-                        hp: 10,
+                        max_hp: 20,
+                        hp: 20,
                         defense: 0,
-                        power: 3,
+                        power: 4,
                         xp: 35,
                         on_death: DeathCallback::Monster,
                     });
@@ -521,10 +521,10 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
 
                     // Set troll components
                     object.fighter = Some(Fighter {
-                        max_hp: 16,
-                        hp: 16,
-                        defense: 1,
-                        power: 4,
+                        max_hp: 30,
+                        hp: 30,
+                        defense: 2,
+                        power: 8,
                         xp: 100,
                         on_death: DeathCallback::Monster,
                     });
@@ -1567,10 +1567,10 @@ fn new_game() -> (Game, Vec<Object>) {
 
     // Set player's fighter component
     player.fighter = Some(Fighter {
-        max_hp: 30,
-        hp: 30,
-        defense: 2,
-        power: 5,
+        max_hp: 100,
+        hp: 100,
+        defense: 1,
+        power: 4,
         xp: 0,
         on_death: DeathCallback::Player,
     });
