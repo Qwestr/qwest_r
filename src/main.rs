@@ -81,13 +81,13 @@ const FOV_LIGHT_WALLS: bool = true;
 const TORCH_RADIUS: i32 = 10;
 
 // Game item constants 
-const HEAL_AMOUNT: i32 = 4;
+const HEAL_AMOUNT: i32 = 40;
 const LIGHTNING_DAMAGE: i32 = 40;
 const LIGHTNING_RANGE: i32 = 5;
 const CONFUSE_RANGE: i32 = 8;
 const CONFUSE_NUM_TURNS: i32 = 10;
 const FIREBALL_RADIUS: i32 = 3;
-const FIREBALL_DAMAGE: i32 = 12;
+const FIREBALL_DAMAGE: i32 = 25;
 
 // Player will always be the first object
 const PLAYER: usize = 0;
