@@ -145,6 +145,14 @@ enum Item {
     Fireball,
 }
 
+// A way to track currently-used Equipment
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+enum Slot {
+    LeftHand,
+    RightHand,
+    Head,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 enum DeathCallback {
     Player,
@@ -178,10 +186,11 @@ struct Object {
     alive: bool,
     name: String,
     always_visible: bool,
+    level: i32,
     fighter: Option<Fighter>,  
     ai: Option<AI>,
     item: Option<Item>,
-    level: i32,
+    equipment: Option<Equipment>,
 }
 
 impl Object {
@@ -194,11 +203,12 @@ impl Object {
             blocks,
             alive: false,
             always_visible: false,
+            level: 1,
             name: name.into(),
             fighter: None,  
             ai: None,
             item: None,
-            level: 1,
+            equipment: None,
         }
     }
 
@@ -281,6 +291,34 @@ impl Object {
         }
     }
 
+    // Equip object and show a message about it
+    pub fn equip(&mut self, messages: &mut Messages) {
+        // Check if the object has an Item property
+        if self.item.is_none() {
+            messages.add(
+                format!("Can't equip {:?} because it's not an Item.", self),
+                RED,
+            );
+            return;
+        };
+
+        // Check if the object has an Equipment property
+        if let Some(ref mut equipment) = self.equipment {
+            if !equipment.equipped {
+                equipment.equipped = true;
+                // messages.add(
+                //     format!("Equipped {} on {}.", self.name, equipment.slot),
+                //     LIGHT_GREEN,
+                // );
+            }
+        } else {
+            messages.add(
+                format!("Can't equip {:?} because it's not an Equipment.", self),
+                RED,
+            );
+        }
+    }
+
     // Return the distance to some coordinates
     pub fn distance(&self, x: i32, y: i32) -> f32 {
         (((x - self.x).pow(2) + (y - self.y).pow(2)) as f32).sqrt()
@@ -309,14 +347,6 @@ struct Fighter {
 struct Equipment {
     slot: Slot,
     equipped: bool,
-}
-
-// A way to track currently-used Equipment
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-enum Slot {
-    LeftHand,
-    RightHand,
-    Head,
 }
 
 // Console messages
