@@ -120,6 +120,7 @@ const COLOR_LIGHT_GROUND: Color = Color {
 
 // 20 frames-per-second maximum
 const LIMIT_FPS: i32 = 20;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum PlayerAction {
     TookTurn,
@@ -301,6 +302,21 @@ struct Fighter {
     power: i32,
     xp: i32,
     on_death: DeathCallback,
+}
+
+// An object that can be equipped, yielding bonuses.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+struct Equipment {
+    slot: Slot,
+    equipped: bool,
+}
+
+// A way to track currently-used Equipment
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+enum Slot {
+    LeftHand,
+    RightHand,
+    Head,
 }
 
 // Console messages
