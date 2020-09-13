@@ -74,8 +74,6 @@ const MAP_HEIGHT: i32 = 43;
 const ROOM_MAX_SIZE: i32 = 10;
 const ROOM_MIN_SIZE: i32 = 6;
 const MAX_ROOMS: i32 = 30;
-const MAX_ROOM_MONSTERS: i32 = 3;
-const MAX_ROOM_ITEMS: i32 = 2;
 
 // Default FOV algorithm and other values
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
@@ -453,9 +451,18 @@ fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
     }
 }
 
-fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
+fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
+    // Define maximum number of monsters per room based on level
+    let max_monsters = from_dungeon_level(
+        &[
+            Transition { level: 1, value: 2 },
+            Transition { level: 4, value: 3 },
+            Transition { level: 6, value: 5 },
+        ],
+        level,
+    );
     // Choose random number of monsters
-    let num_monsters = rand::thread_rng().gen_range(0, MAX_ROOM_MONSTERS + 1);
+    let num_monsters = rand::thread_rng().gen_range(0, max_monsters + 1);
 
     for _ in 0..num_monsters {
         // Choose random spot for this monster
@@ -464,6 +471,15 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Check if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
+            // Define chance of creating a troll based on level
+            let troll_chance = from_dungeon_level(
+                &[
+                    Transition { level: 3, value: 15 },
+                    Transition { level: 5, value: 30 },
+                    Transition { level: 7, value: 60 },
+                ],
+                level,
+            );
             // Create monster generator table
             let monster_chances = &mut [
                 Weighted {
@@ -471,7 +487,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     item: "orc",
                 },
                 Weighted {
-                    weight: 20,
+                    weight: troll_chance,
                     item: "troll",
                 },
             ];
@@ -528,8 +544,17 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         }
     }
 
+    // Define maximum number of items per room based on level
+    let max_items = from_dungeon_level(
+        &[
+            Transition { level: 1, value: 1 },
+            Transition { level: 4, value: 2 },
+        ],
+        level,
+    );
+
     // Choose random number of items
-    let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
+    let num_items = rand::thread_rng().gen_range(0, max_items + 1);
 
     for _ in 0..num_items {
         // Choose random spot for this item
@@ -541,19 +566,28 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
             // Create item generator table
             let item_chances = &mut [
                 Weighted {
-                    weight: 70,
+                    weight: 35,
                     item: Item::Heal,
                 },
                 Weighted {
-                    weight: 10,
+                    weight: from_dungeon_level(
+                        &[Transition { level: 4, value: 25 }],
+                        level,
+                    ),
                     item: Item::Lightning,
                 },
                 Weighted {
-                    weight: 10,
+                    weight: from_dungeon_level(
+                        &[Transition { level: 6, value: 25 }],
+                        level,
+                    ),
                     item: Item::Fireball,
                 },
                 Weighted {
-                    weight:10,
+                    weight: from_dungeon_level(
+                        &[Transition { level: 2, value: 10 }],
+                        level,
+                    ),
                     item: Item::Confuse,
                 },
             ];
@@ -606,7 +640,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
     }
 }
 
-fn make_map(objects: &mut Vec<Object>) -> Map {
+fn make_map(objects: &mut Vec<Object>, level: u32) -> Map {
     // Fill map with "blocked" tiles
     let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
 
@@ -640,7 +674,7 @@ fn make_map(objects: &mut Vec<Object>) -> Map {
             create_room(new_room, &mut map);
 
             // Add some content to this room, such as monsters
-            place_objects(new_room, &map, objects);
+            place_objects(new_room, &map, objects, level);
 
             // Center coordinates of the new room, will be useful later
             let (new_x, new_y) = new_room.center();
@@ -1549,7 +1583,7 @@ fn new_game() -> (Game, Vec<Object>) {
 
     // Define game
     let mut game = Game {
-        map: make_map(&mut objects),
+        map: make_map(&mut objects, 1),
         messages: Messages::new(),
         inventory: vec![],
         dungeon_level: 1,
@@ -1661,7 +1695,7 @@ fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
     game.dungeon_level += 1;
 
     // Make new map for level
-    game.map = make_map(objects);
+    game.map = make_map(objects, game.dungeon_level);
 
     // Initialize FOV
     initialise_fov(tcod, &game.map);
