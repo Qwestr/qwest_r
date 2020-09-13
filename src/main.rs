@@ -167,27 +167,6 @@ enum UseResult {
     Cancelled,
 }
 
-#[derive(Serialize, Deserialize)]
-struct Messages {
-    messages: Vec<(String, Color)>,
-}
-
-impl Messages {
-    pub fn new() -> Self {
-        Self { messages: vec![] }
-    }
-
-    // Add the new message as a tuple, with the text and the color
-    pub fn add<T: Into<String>>(&mut self, message: T, color: Color) {
-        self.messages.push((message.into(), color));
-    }
-
-    // Create a `DoubleEndedIterator` over the messages
-    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &(String, Color)> {
-        self.messages.iter()
-    }
-}
-
 // This is a generic object: the player, a monster, an item, the stairs...
 // It's always represented by a character on screen.
 #[derive(Debug, Serialize, Deserialize)]
@@ -326,6 +305,28 @@ struct Fighter {
     on_death: DeathCallback,
 }
 
+// Console messages
+#[derive(Serialize, Deserialize)]
+struct Messages {
+    messages: Vec<(String, Color)>,
+}
+
+impl Messages {
+    pub fn new() -> Self {
+        Self { messages: vec![] }
+    }
+
+    // Add the new message as a tuple, with the text and the color
+    pub fn add<T: Into<String>>(&mut self, message: T, color: Color) {
+        self.messages.push((message.into(), color));
+    }
+
+    // Create a `DoubleEndedIterator` over the messages
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &(String, Color)> {
+        self.messages.iter()
+    }
+}
+
 // A rectangle on the map, used to characterise a room.
 #[derive(Clone, Copy, Debug)]
 struct Rect {
@@ -397,6 +398,11 @@ struct Game {
     messages: Messages,
     inventory: Vec<Object>,
     dungeon_level: u32,
+}
+
+struct Transition {
+    level: u32,
+    value: u32,
 }
 
 // Tcod struct
@@ -566,7 +572,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     object
                 }
                 Item::Lightning => {
-                    // Create a lightning bolt scroll (10% chance)
+                    // Create a lightning bolt scroll
                     let mut object = Object::new(x, y, '#', "scroll of lightning bolt", LIGHT_YELLOW, false);
                     object.item = Some(Item::Lightning);
 
@@ -574,7 +580,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     object
                 }
                 Item::Confuse => {
-                    // Create a confuse scroll (10% chance)
+                    // Create a confuse scroll
                     let mut object = Object::new(x, y, '#', "scroll of confusion", LIGHT_YELLOW, false);
                     object.item = Some(Item::Confuse);
                     
@@ -582,7 +588,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     object
                 } 
                 Item::Fireball => {
-                    // Create a fireball scroll (10% chance)
+                    // Create a fireball scroll
                     let mut object = Object::new(x, y, '#', "scroll of fireball", LIGHT_YELLOW, false);
                     object.item = Some(Item::Fireball);
                     
