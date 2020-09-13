@@ -458,7 +458,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Check if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
-            // Create monster random table
+            // Create monster generator table
             let monster_chances = &mut [
                 Weighted {
                     weight: 80,
@@ -477,10 +477,10 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
             let mut monster = match monster_choice.ind_sample(&mut rand::thread_rng()) {
                 "orc" => {
                     // Create an orc
-                    let mut orc = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
+                    let mut object = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
                     
                     // Set orc components
-                    orc.fighter = Some(Fighter {
+                    object.fighter = Some(Fighter {
                         max_hp: 10,
                         hp: 10,
                         defense: 0,
@@ -488,17 +488,17 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                         xp: 35,
                         on_death: DeathCallback::Monster,
                     });
-                    orc.ai = Some(AI::Basic);
+                    object.ai = Some(AI::Basic);
                     
                     // Return the orc
-                    orc
+                    object
                 }
                 "troll" => {
                     // Create a troll
-                    let mut troll = Object::new(x, y, 'T', "troll", DARKER_GREEN, true);
+                    let mut object = Object::new(x, y, 'T', "troll", DARKER_GREEN, true);
 
                     // Set troll components
-                    troll.fighter = Some(Fighter {
+                    object.fighter = Some(Fighter {
                         max_hp: 16,
                         hp: 16,
                         defense: 1,
@@ -506,10 +506,10 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                         xp: 100,
                         on_death: DeathCallback::Monster,
                     });
-                    troll.ai = Some(AI::Basic);
+                    object.ai = Some(AI::Basic);
 
                     // Return the troll
-                    troll
+                    object
                 }
                 _ => unreachable!(),
             };
@@ -532,28 +532,65 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         // Only place it if the tile is not blocked
         if !is_blocked(x, y, map, objects) {
-            let dice = rand::random::<f32>();
-            let mut item = if dice < 0.6 {
-                // Create a healing potion (60% chance)
-                let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
-                object.item = Some(Item::Heal);
-                object
-            } else if dice < 0.7 {
-                // Create a lightning bolt scroll (10% chance)
-                let mut object = Object::new(x, y, '#', "scroll of lightning bolt", LIGHT_YELLOW, false);
-                object.item = Some(Item::Lightning);
-                object
-            } else if dice < 0.8 {
-                // Create a confuse scroll (10% chance)
-                let mut object = Object::new(x, y, '#', "scroll of confusion", LIGHT_YELLOW, false);
-                object.item = Some(Item::Confuse);
-                object
-            } else {
-                // Create a fireball scroll (10% chance)
-                let mut object = Object::new(x, y, '#', "scroll of fireball", LIGHT_YELLOW, false);
-                object.item = Some(Item::Fireball);
-                object
+            // Create item generator table
+            let item_chances = &mut [
+                Weighted {
+                    weight: 70,
+                    item: Item::Heal,
+                },
+                Weighted {
+                    weight: 10,
+                    item: Item::Lightning,
+                },
+                Weighted {
+                    weight: 10,
+                    item: Item::Fireball,
+                },
+                Weighted {
+                    weight:10,
+                    item: Item::Confuse,
+                },
+            ];
+
+            // Create item choice generator
+            let item_choice = WeightedChoice::new(item_chances);
+
+            // Generate the item
+            let mut item = match item_choice.ind_sample(&mut rand::thread_rng()) {
+                Item::Heal => {
+                    // Create a healing potion
+                    let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
+                    object.item = Some(Item::Heal);
+
+                    // Return the item
+                    object
+                }
+                Item::Lightning => {
+                    // Create a lightning bolt scroll (10% chance)
+                    let mut object = Object::new(x, y, '#', "scroll of lightning bolt", LIGHT_YELLOW, false);
+                    object.item = Some(Item::Lightning);
+
+                    // Return the item
+                    object
+                }
+                Item::Confuse => {
+                    // Create a confuse scroll (10% chance)
+                    let mut object = Object::new(x, y, '#', "scroll of confusion", LIGHT_YELLOW, false);
+                    object.item = Some(Item::Confuse);
+                    
+                    // Return the object
+                    object
+                } 
+                Item::Fireball => {
+                    // Create a fireball scroll (10% chance)
+                    let mut object = Object::new(x, y, '#', "scroll of fireball", LIGHT_YELLOW, false);
+                    object.item = Some(Item::Fireball);
+                    
+                    // Return the object
+                    object
+                }
             };
+            
             // Set item to be always visible once found
             item.always_visible = true;
 
