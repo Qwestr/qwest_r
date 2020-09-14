@@ -1,4 +1,4 @@
-use rand::distributions::{IndependentSample, Weighted, WeightedChoice};
+use rand::distributions::{Distribution, Weighted, WeightedChoice};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::cmp;
@@ -293,7 +293,7 @@ impl Object {
 
     // Equip object and show a message about it
     pub fn equip(&mut self, messages: &mut Messages) {
-        // Check if the object has an Item property
+        // Check if Object is an Item
         if self.item.is_none() {
             messages.add(
                 format!("Can't equip {:?} because it's not an Item.", self),
@@ -302,18 +302,46 @@ impl Object {
             return;
         };
 
-        // Check if the object has an Equipment property
+        // Check if the Object has an Equipment property
         if let Some(ref mut equipment) = self.equipment {
+            // Check if Item is already equipped
             if !equipment.equipped {
                 equipment.equipped = true;
-                // messages.add(
-                //     format!("Equipped {} on {}.", self.name, equipment.slot),
-                //     LIGHT_GREEN,
-                // );
+                messages.add(
+                    format!("Equipped {} on {}.", self.name, equipment.slot),
+                    LIGHT_GREEN,
+                );
             }
         } else {
             messages.add(
                 format!("Can't equip {:?} because it's not an Equipment.", self),
+                RED,
+            );
+        }
+    }
+
+    // Dequip object and show a message about it
+    pub fn dequip(&mut self, messages: &mut Messages) {
+        // Check if Object is an Item
+        if self.item.is_none() {
+            messages.add(
+                format!("Can't dequip {:?} because it's not an Item.", self),
+                RED,
+            );
+            return;
+        };
+        if let Some(ref mut equipment) = self.equipment {
+            // Check if Ttem is already equipped
+            if equipment.equipped {
+                equipment.equipped = false;
+                messages.add(
+                    format!("Dequipped {} from {}.", self.name, equipment.slot),
+                    LIGHT_YELLOW,
+                );
+            }
+        } else {
+            messages.add(
+                format!("Can't dequip {:?} because it's not an Equipment.", self),
                 RED,
             );
         }
@@ -542,7 +570,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
             let monster_choice = WeightedChoice::new(monster_chances);
 
             // Generate the monster
-            let mut monster = match monster_choice.ind_sample(&mut rand::thread_rng()) {
+            let mut monster = match monster_choice.sample(&mut rand::thread_rng()) {
                 "orc" => {
                     // Create an orc
                     let mut object = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
@@ -642,7 +670,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
             let item_choice = WeightedChoice::new(item_chances);
 
             // Generate the item
-            let mut item = match item_choice.ind_sample(&mut rand::thread_rng()) {
+            let mut item = match item_choice.sample(&mut rand::thread_rng()) {
                 Item::Heal => {
                     // Create a healing potion
                     let mut object = Object::new(x, y, '!', "healing potion", VIOLET, false);
