@@ -1687,6 +1687,19 @@ fn toggle_equipment(
     UseResult::UsedAndKept
 }
 
+fn get_equipped_in_slot(slot: Slot, inventory: &[Object]) -> Option<usize> {
+    for (inventory_id, item) in inventory.iter().enumerate() {
+        if item
+            .equipment
+            .as_ref()
+            .map_or(false, |e| e.equipped && e.slot == slot)
+        {
+            return Some(inventory_id);
+        }
+    }
+    None
+}
+
 /// Start a new game
 fn new_game() -> (Game, Vec<Object>) {
     // Create the player
