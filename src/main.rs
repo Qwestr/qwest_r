@@ -935,10 +935,21 @@ fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
 
 // Drop an item
 fn drop_item(inventory_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    // Remove the item from the inventory
     let mut item = game.inventory.remove(inventory_id);
+
+    // Dequip the item if it is Equipment
+    if item.equipment.is_some() {
+        item.dequip(&mut game.messages);
+    }
+
+    // Set the screen position for where to draw the item
     item.set_pos(objects[PLAYER].x, objects[PLAYER].y);
-    game.messages
-        .add(format!("You dropped a {}.", item.name), YELLOW);
+
+    // Send a message about the activity
+    game.messages.add(format!("You dropped a {}.", item.name), YELLOW);
+    
+    // Push the item to the objects array
     objects.push(item);
 }
 
