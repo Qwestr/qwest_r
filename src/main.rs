@@ -365,12 +365,26 @@ impl Object {
         (((x - self.x).pow(2) + (y - self.y).pow(2)) as f32).sqrt()
     }
 
+    // Returns a list of equipped items
+    pub fn get_all_equipped(&self, game: &Game) -> Vec<Equipment> {
+        if self.name == "player" {
+            game.inventory
+                .iter()
+                .filter(|item| item.equipment.map_or(false, |e| e.equipped))
+                .map(|item| item.equipment.unwrap())
+                .collect()
+        } else {
+            // Other objects have no equipment
+            vec![]
+        }
+    }
+
     pub fn power(&self, game: &Game) -> i32 {
         // Get base power from Fighter component
         let base_power = self.fighter.map_or(0, |f| f.power);
 
         // Get bonus power from all equipped items
-        let bonus = self
+        let bonus: i32 = self
             .get_all_equipped(game)
             .iter()
             .map(|e| e.power_bonus)
@@ -379,8 +393,6 @@ impl Object {
         // Return total power
         base_power + bonus
     }
-
-
 
     // Set the color and then draw the character that represents this object at its position
     pub fn draw(&self, con: &mut dyn Console) {
@@ -742,7 +754,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     // Create a sword
                     let mut object = Object::new(x, y, '/', "sword", SKY, false);
                     object.item = Some(Item::Equipment);
-                    object.equipment = Some(Equipment{equipped: false, slot: Slot::RightHand});
+                    object.equipment = Some(Equipment{equipped: false, slot: Slot::RightHand, power_bonus: 0});
 
                     // Return the object
                     object
