@@ -143,6 +143,7 @@ enum Item {
     Lightning,
     Confuse,
     Fireball,
+    Equipment,
 }
 
 // A way to track currently-used Equipment
