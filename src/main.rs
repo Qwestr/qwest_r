@@ -419,7 +419,7 @@ impl Object {
 struct Fighter {
     max_hp: i32,
     hp: i32,
-    defense: i32,
+    base_defense: i32,
     base_power: i32,
     xp: i32,
     on_death: DeathCallback,
@@ -430,6 +430,8 @@ struct Fighter {
 struct Equipment {
     slot: Slot,
     equipped: bool,
+    max_hp_bonus: i32,
+    defense_bonus: i32,
     power_bonus: i32,
 }
 
