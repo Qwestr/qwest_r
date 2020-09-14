@@ -267,8 +267,8 @@ impl Object {
     }
 
     pub fn attack(&mut self, target: &mut Object, game: &mut Game) {
-        // A simple formula for attack damage
-        let damage = self.power(game) - target.fighter.map_or(0, |f| f.defense);
+        // Calculate attack damage
+        let damage = self.power(game) - target.defense(game);
 
         // Check if object took damage
         if damage > 0 {
@@ -294,6 +294,17 @@ impl Object {
                 WHITE,
             );
         }
+    }
+
+    pub fn defense(&self, game: &Game) -> i32 {
+        // Get base defense from Fighter component
+        let base_defense = self.fighter.map_or(0, |f| f.base_defense);
+        let bonus: i32 = self
+            .get_all_equipped(game)
+            .iter()
+            .map(|e| e.defense_bonus)
+            .sum();
+        base_defense + bonus
     }
 
     // Heal by the given amount, without going over the maximum
