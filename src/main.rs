@@ -900,6 +900,7 @@ fn closest_monster(tcod: &Tcod, objects: &[Object], max_range: i32) -> Option<us
 
 // Add to the player's inventory and remove from the map
 fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    // Check if inventory is full
     if game.inventory.len() >= 26 {
         game.messages.add(
             format!(
@@ -909,12 +910,26 @@ fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
             RED,
         );
     } else {
+        // Add item to inventory
         let item = objects.swap_remove(object_id);
         game.messages.add(
             format!("You picked up a {}!", item.name),
             GREEN
         );
+
+        // Get index, slot (if exists) of new item
+        let index = game.inventory.len();
+        let slot = item.equipment.map(|e| e.slot);
+
+        // Add item to inventory
         game.inventory.push(item);
+
+        // Automatically equip, if the corresponding equipment slot is unused
+        if let Some(slot) = slot {
+            if get_equipped_in_slot(slot, &game.inventory).is_none() {
+                game.inventory[index].equip(&mut game.messages);
+            }
+        }
     }
 }
 
