@@ -226,8 +226,17 @@ impl Object {
     }
 
     pub fn power(&self, game: &Game) -> i32 {
-        let base_power = ...;
-        let bonus = ...;
+        // Get base power from Fighter component
+        let base_power = self.fighter.map_or(0, |f| f.power);
+
+        // Get bonus power from all equipped items
+        let bonus = self
+            .get_all_equipped(game)
+            .iter()
+            .map(|e| e.power_bonus)
+            .sum();
+        
+        // Return total power
         base_power + bonus
     }
 
