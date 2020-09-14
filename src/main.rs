@@ -225,21 +225,6 @@ impl Object {
         }
     }
 
-    pub fn power(&self, game: &Game) -> i32 {
-        // Get base power from Fighter component
-        let base_power = self.fighter.map_or(0, |f| f.power);
-
-        // Get bonus power from all equipped items
-        let bonus = self
-            .get_all_equipped(game)
-            .iter()
-            .map(|e| e.power_bonus)
-            .sum();
-        
-        // Return total power
-        base_power + bonus
-    }
-
     pub fn pos(&self) -> (i32, i32) {
         (self.x, self.y)
     }
@@ -380,6 +365,23 @@ impl Object {
         (((x - self.x).pow(2) + (y - self.y).pow(2)) as f32).sqrt()
     }
 
+    pub fn power(&self, game: &Game) -> i32 {
+        // Get base power from Fighter component
+        let base_power = self.fighter.map_or(0, |f| f.power);
+
+        // Get bonus power from all equipped items
+        let bonus = self
+            .get_all_equipped(game)
+            .iter()
+            .map(|e| e.power_bonus)
+            .sum();
+        
+        // Return total power
+        base_power + bonus
+    }
+
+
+
     // Set the color and then draw the character that represents this object at its position
     pub fn draw(&self, con: &mut dyn Console) {
         con.set_default_foreground(self.color);
@@ -403,6 +405,7 @@ struct Fighter {
 struct Equipment {
     slot: Slot,
     equipped: bool,
+    power_bonus: i32,
 }
 
 // Console messages
