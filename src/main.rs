@@ -241,6 +241,16 @@ impl Object {
         ((dx.pow(2) + dy.pow(2)) as f32).sqrt()
     }
 
+    pub fn max_hp(&self, game: &Game) -> i32 {
+        let base_max_hp = self.fighter.map_or(0, |f| f.base_max_hp);
+        let bonus: i32 = self
+            .get_all_equipped(game)
+            .iter()
+            .map(|e| e.max_hp_bonus)
+            .sum();
+        base_max_hp + bonus
+    }
+
     pub fn take_damage(&mut self, damage: i32, game: &mut Game) -> Option<i32> {
         // Apply damage if possible
         if let Some(fighter) = self.fighter.as_mut() {
