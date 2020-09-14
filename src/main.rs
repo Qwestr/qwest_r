@@ -1674,6 +1674,11 @@ fn toggle_equipment(
         None => return UseResult::Cancelled,
     };
 
+    // If the slot is already being used, dequip whatever is there first
+    if let Some(current) = get_equipped_in_slot(equipment.slot, &game.inventory) {
+        game.inventory[current].dequip(&mut game.messages);
+    }
+
     // Check if Item is already equipped
     if equipment.equipped {
         // Dequip item
