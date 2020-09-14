@@ -23,6 +23,7 @@ use tcod::colors::{
     LIGHT_YELLOW,
     ORANGE,
     RED,
+    SKY,
     VIOLET,
     WHITE,
     YELLOW,
@@ -154,6 +155,16 @@ enum Slot {
     Head,
 }
 
+impl std::fmt::Display for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            Slot::LeftHand => write!(f, "left hand"),
+            Slot::RightHand => write!(f, "right hand"),
+            Slot::Head => write!(f, "head"),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 enum DeathCallback {
     Player,
@@ -172,6 +183,7 @@ impl DeathCallback {
 
 enum UseResult {
     UsedUp,
+    UsedAndKept,
     Cancelled,
 }
 
@@ -665,6 +677,10 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     ),
                     item: Item::Confuse,
                 },
+                Weighted {
+                    weight: 1000,
+                    item: Item::Equipment,
+                },
             ];
 
             // Create item choice generator
@@ -701,6 +717,15 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     let mut object = Object::new(x, y, '#', "scroll of fireball", LIGHT_YELLOW, false);
                     object.item = Some(Item::Fireball);
                     
+                    // Return the object
+                    object
+                }
+                Item::Equipment => {
+                    // Create a sword
+                    let mut object = Object::new(x, y, '/', "sword", SKY, false);
+                    object.item = Some(Item::Equipment);
+                    object.equipment = Some(Equipment{equipped: false, slot: Slot::RightHand});
+
                     // Return the object
                     object
                 }
@@ -1413,12 +1438,14 @@ fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut
             Item::Lightning => cast_lightning,
             Item::Confuse => cast_confuse,
             Item::Fireball => cast_fireball,
+            Item::Equipment => toggle_equipment,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
-                // destroy after use, unless it was cancelled for some reason
+                // Destroy after use, unless it was cancelled for some reason
                 game.inventory.remove(inventory_id);
             }
+            UseResult::UsedAndKept => {} // Do nothing
             UseResult::Cancelled => {
                 game.messages.add("Cancelled", WHITE);
             }
@@ -1633,6 +1660,31 @@ fn cast_fireball(
 
     // Return UsedUp result
     UseResult::UsedUp
+}
+
+fn toggle_equipment(
+    inventory_id: usize,
+    _tcod: &mut Tcod,
+    game: &mut Game,
+    _objects: &mut [Object],
+) -> UseResult {
+    // Get equipment from inventory
+    let equipment = match game.inventory[inventory_id].equipment {
+        Some(equipment) => equipment,
+        None => return UseResult::Cancelled,
+    };
+
+    // Check if Item is already equipped
+    if equipment.equipped {
+        // Dequip item
+        game.inventory[inventory_id].dequip(&mut game.messages);
+    } else {
+        // Equip item
+        game.inventory[inventory_id].equip(&mut game.messages);
+    }
+
+    // Return UsedAndKept result
+    UseResult::UsedAndKept
 }
 
 /// Start a new game
