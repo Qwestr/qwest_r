@@ -268,7 +268,9 @@ impl Object {
 
     pub fn attack(&mut self, target: &mut Object, game: &mut Game) {
         // A simple formula for attack damage
-        let damage = self.fighter.map_or(0, |f| f.power) - target.fighter.map_or(0, |f| f.defense);
+        let damage = self.power(game) - target.fighter.map_or(0, |f| f.defense);
+
+        // Check if object took damage
         if damage > 0 {
             // Make the target take some damage
             game.messages.add(
@@ -381,7 +383,7 @@ impl Object {
 
     pub fn power(&self, game: &Game) -> i32 {
         // Get base power from Fighter component
-        let base_power = self.fighter.map_or(0, |f| f.power);
+        let base_power = self.fighter.map_or(0, |f| f.base_power);
 
         // Get bonus power from all equipped items
         let bonus: i32 = self
@@ -407,7 +409,7 @@ struct Fighter {
     max_hp: i32,
     hp: i32,
     defense: i32,
-    power: i32,
+    base_power: i32,
     xp: i32,
     on_death: DeathCallback,
 }
@@ -623,7 +625,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                         max_hp: 20,
                         hp: 20,
                         defense: 0,
-                        power: 4,
+                        base_power: 4,
                         xp: 35,
                         on_death: DeathCallback::Monster,
                     });
@@ -641,7 +643,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                         max_hp: 30,
                         hp: 30,
                         defense: 2,
-                        power: 8,
+                        base_power: 8,
                         xp: 100,
                         on_death: DeathCallback::Monster,
                     });
@@ -1374,7 +1376,7 @@ Experience to level up: {}
 
 Maximum HP: {}
 Attack: {}
-Defense: {}", level, fighter.xp, level_up_xp, fighter.max_hp, fighter.power, fighter.defense);
+Defense: {}", level, fighter.xp, level_up_xp, fighter.max_hp, player.power(game), fighter.defense);
 
                 // Show message box
                 message_box(&msg, CHARACTER_SCREEN_WIDTH, &mut tcod.root);
@@ -1779,7 +1781,7 @@ fn new_game() -> (Game, Vec<Object>) {
         max_hp: 100,
         hp: 100,
         defense: 1,
-        power: 4,
+        base_power: 4,
         xp: 0,
         on_death: DeathCallback::Player,
     });
@@ -1938,7 +1940,7 @@ fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
                 "Level up! Choose a stat to raise:\n",
                 &[
                     format!("Constitution (+20 HP, from {})", fighter.max_hp),
-                    format!("Strength (+1 attack, from {})", fighter.power),
+                    format!("Strength (+1 attack, from {})", fighter.base_power),
                     format!("Agility (+1 defense, from {})", fighter.defense),
                 ],
                 LEVEL_SCREEN_WIDTH,
@@ -1959,7 +1961,7 @@ fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut [Object]) {
             }
             1 => {
                 // Strength
-                fighter.power += 1;
+                fighter.base_power += 1;
             }
             2 => {
                 // Agility
