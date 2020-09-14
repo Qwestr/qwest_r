@@ -225,6 +225,12 @@ impl Object {
         }
     }
 
+    pub fn power(&self, game: &Game) -> i32 {
+        let base_power = ...;
+        let bonus = ...;
+        base_power + bonus
+    }
+
     pub fn pos(&self) -> (i32, i32) {
         (self.x, self.y)
     }
