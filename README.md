@@ -18,14 +18,6 @@ Originally inspired by [Roguelike Tutorial in Rust + tcod](https://tomassedovic.
 
 5.  Run `cargo run --release` to start the application
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `cargo run`
-
-Runs the game in your terminal window.
-
 ## License
 
 Copyright © 2016-2020 Qwestr LLC. This source code is licensed under the MIT
