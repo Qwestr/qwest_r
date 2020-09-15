@@ -324,8 +324,8 @@ impl Object {
         let max_hp = self.max_hp(game);
         if let Some(ref mut fighter) = self.fighter {
             fighter.hp += amount;
-            if fighter.hp > fighter.max_hp {
-                fighter.hp = fighter.max_hp;
+            if fighter.hp > max_hp {
+                fighter.hp = max_hp;
             }
         }
     }
@@ -430,8 +430,8 @@ impl Object {
 // Combat-related properties and methods (monster, player, NPC).
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 struct Fighter {
-    max_hp: i32,
     hp: i32,
+    base_max_hp: i32,
     base_defense: i32,
     base_power: i32,
     xp: i32,
@@ -648,8 +648,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     
                     // Set orc components
                     object.fighter = Some(Fighter {
-                        base_max_hp: 20,
                         hp: 20,
+                        base_max_hp: 20,
                         base_defense: 0,
                         base_power: 4,
                         xp: 35,
@@ -666,8 +666,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
 
                     // Set troll components
                     object.fighter = Some(Fighter {
-                        base_max_hp: 30,
                         hp: 30,
+                        base_max_hp: 30,
                         base_defense: 2,
                         base_power: 8,
                         xp: 100,
@@ -1845,10 +1845,10 @@ fn new_game() -> (Game, Vec<Object>) {
 
     // Set player's fighter component
     player.fighter = Some(Fighter {
-        max_hp: 100,
         hp: 100,
+        base_max_hp: 100,
         base_defense: 1,
-        base_power: 4,
+        base_power: 2,
         xp: 0,
         on_death: DeathCallback::Player,
     });
@@ -1972,7 +1972,7 @@ fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
     );
 
     // Heal up to half of the player's max hp
-    let heal_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp / 2);
+    let heal_hp = objects[PLAYER].max_hp(game) / 2;
     objects[PLAYER].heal(heal_hp, game);
 
     // Show next level message
