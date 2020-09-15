@@ -14,9 +14,9 @@ Originally inspired by [Roguelike Tutorial in Rust + tcod](https://tomassedovic.
 
 2.  Create a file in the `/prisma` dir called `.env` and `DATABASE_URL="file:./dev.db"`
 
-4.  Migrate the database to the latest version using `yarn migrate:update`
+4.  Run `cargo build --release` to build the application
 
-5.  Run `yarn start` to start the application
+5.  Run `cargo run --release` to start the application
 
 ## Available Scripts
 
