@@ -2180,10 +2180,3 @@ fn main() {
     // Show the main menu
     main_menu(&mut tcod);
 }
-
-// use qwest_r::play;
-
-// fn main() {
-//     // Start the game
-//     play();
-// }
