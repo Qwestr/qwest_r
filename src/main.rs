@@ -1847,7 +1847,7 @@ fn new_game() -> (Game, Vec<Object>) {
     player.fighter = Some(Fighter {
         max_hp: 100,
         hp: 100,
-        defense: 1,
+        base_defense: 1,
         base_power: 4,
         xp: 0,
         on_death: DeathCallback::Player,
@@ -1866,6 +1866,18 @@ fn new_game() -> (Game, Vec<Object>) {
         inventory: vec![],
         dungeon_level: 1,
     };
+
+    // Initial equipment: a dagger
+    let mut dagger = Object::new(0, 0, '-', "dagger", SKY, false);
+    dagger.item = Some(Item::Sword);
+    dagger.equipment = Some(Equipment {
+        equipped: true,
+        slot: Slot::LeftHand,
+        max_hp_bonus: 0,
+        defense_bonus: 0,
+        power_bonus: 2,
+    });
+    game.inventory.push(dagger);
 
     // Add a warm welcoming message!
     game.messages.add(
