@@ -1,8 +1,10 @@
 # qwest_r
 
-A game about games, life, and everything in-between
+A game about games, life, and everything in-between!
 
-A text-based adventure, built with [Rust](https://www.rust-lang.org/)
+A roguelike dungeon crawl, built with [Rust](https://www.rust-lang.org/).
+
+Originally inspired by [Roguelike Tutorial in Rust + tcod](https://tomassedovic.github.io/roguelike-tutorial/index.html).
 
 ## How To Start
 
@@ -22,8 +24,7 @@ In the project directory, you can run:
 
 ### `cargo run`
 
-Runs the game in your terminal window
-.
+Runs the game in your terminal window.
 
 ## License
 
