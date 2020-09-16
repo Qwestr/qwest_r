@@ -1513,9 +1513,15 @@ fn menu<T: AsRef<str>>(header: &str, options: &[T], width: i32, root: &mut Root)
     let y = SCREEN_HEIGHT / 2 - height / 2;
     console::blit(&window, (0, 0), (width, height), root, (x, y), 1.0, 0.7);
 
-    // Present the root console to the player and wait for a key-press
+    // Present the menu to the player
     root.flush();
+
+    // wait for a key press
     let key = root.wait_for_keypress(true);
+
+    // Flush out input buffer
+    // NOTE: wait_for_keypress should already be doing this, but is failing to do so.
+    for (_, _) in input::events().enumerate() {}
 
     // Convert the ASCII code to an index; if it corresponds to an option, return it
     if key.printable.is_alphabetic() {
