@@ -1,29 +1,20 @@
 # qwest_r
 
-A game about games, life, and everything in-between
+A game about games, life, and everything in-between!
 
-A text-based adventure, built with [Rust](https://www.rust-lang.org/)
+A roguelike dungeon crawl, built with [Rust](https://www.rust-lang.org/).
+
+Originally inspired by [Roguelike Tutorial in Rust + tcod](https://tomassedovic.github.io/roguelike-tutorial/index.html).
 
 ## How To Start
 
-1.  [Install Rust](https://www.rust-lang.org/tools/install)
+1.  [Install Rust](https://www.rust-lang.org/tools/install).
 
-2.  Create a file in the `/prisma` dir called `dev.db`.
+2.  Navigate to the directory where this code was downloaded.
 
-2.  Create a file in the `/prisma` dir called `.env` and `DATABASE_URL="file:./dev.db"`
+3.  Run `cargo build --release` to build the application.
 
-4.  Migrate the database to the latest version using `yarn migrate:update`
-
-5.  Run `yarn start` to start the application
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `cargo run`
-
-Runs the game in your terminal window
-.
+4.  Run `cargo run --release` to start the application.
 
 ## License
 
