@@ -650,7 +650,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     // Set orc components
                     object.fighter = Some(Fighter {
                         hp: 20 + (level as i32 / 2),
-                        base_max_hp: 20 + (level as i32 / 4),
+                        base_max_hp: 20 + (level as i32 / 2),
                         base_defense: 0 + (level as i32 / 4),
                         base_power: 4 + (level as i32 / 3),
                         xp: 35 + (level as i32 / 2),
@@ -668,7 +668,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                     // Set troll components
                     object.fighter = Some(Fighter {
                         hp: 30 + (level as i32 / 2),
-                        base_max_hp: 30 + (level as i32 / 4),
+                        base_max_hp: 30 + (level as i32 / 2),
                         base_defense: 2 + (level as i32 / 4),
                         base_power: 8 + (level as i32 / 3),
                         xp: 100 + (level as i32 / 2),
