@@ -57,9 +57,9 @@ const SCREEN_HEIGHT: i32 = 50;
 
 // Sizes and coordinates relevant for the GUI
 const BAR_WIDTH: i32 = 30;
-const PANEL_HEIGHT: i32 = 7;
-const MOUSE_INFO_HEIGHT: i32 = 2;
-const PANEL_Y: i32 = SCREEN_HEIGHT - (PANEL_HEIGHT + MOUSE_INFO_HEIGHT);
+const PANEL_HEIGHT: i32 = 9;
+const MOUSE_INFO_HEIGHT: i32 = 1;
+const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 const INVENTORY_WIDTH: i32 = 50;
 const LEVEL_SCREEN_WIDTH: i32 = 40;
 const CHARACTER_SCREEN_WIDTH: i32 = 30;
@@ -67,11 +67,11 @@ const CHARACTER_SCREEN_WIDTH: i32 = 30;
 // Message log GUI constants
 const MSG_X: i32 = BAR_WIDTH + 2;
 const MSG_WIDTH: i32 = SCREEN_WIDTH - BAR_WIDTH - 2;
-const MSG_HEIGHT: usize = (PANEL_HEIGHT + MOUSE_INFO_HEIGHT) as usize - 1;
+const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
 
 // Size of the map
 const MAP_WIDTH: i32 = 80;
-const MAP_HEIGHT: i32 = SCREEN_HEIGHT - PANEL_Y;
+const MAP_HEIGHT: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 
 // Room parameters for dungeon generator
 const ROOM_MAX_SIZE: i32 = 10;
@@ -1287,16 +1287,17 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     // Render the game messages, one line at a time,
     // from top to bottom, until the end of the screen is hit.
     
-    // As new messages are pushed onto the end of the vector,
-    // and the messages are being interated in reserve
+    // New messages are pushed onto the end of the vector.
+    // Therefore, messages are being iterated in reserve
     let mut y = MSG_HEIGHT as i32;
     for &(ref msg, color) in game.messages.iter().rev() {
         // Get the required message height
         let msg_height = tcod.panel.get_height_rect(MSG_X, y, MSG_WIDTH, 0, msg);
         // Remove from the current message
         y -= msg_height;
-        // If the message goes past the bottom of the panel, break the loop
-        if y < 0 {
+        // If the message goes past the top of the panel (minus the mouse info height),
+        // break the loop
+        if y < (MOUSE_INFO_HEIGHT) {
             break;
         }
         // Print the message
