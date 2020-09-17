@@ -67,7 +67,7 @@ const CHARACTER_SCREEN_WIDTH: i32 = 30;
 // Message log GUI constants
 const MSG_X: i32 = BAR_WIDTH + 2;
 const MSG_WIDTH: i32 = SCREEN_WIDTH - BAR_WIDTH - 2;
-const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
+const MSG_HEIGHT: usize = (PANEL_HEIGHT + MOUSE_INFO_HEIGHT) as usize - 1;
 
 // Size of the map
 const MAP_WIDTH: i32 = 80;
