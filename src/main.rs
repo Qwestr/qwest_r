@@ -1549,12 +1549,35 @@ fn inventory_menu(inventory: &[Object], header: &str, root: &mut Root) -> Option
         vec!["Inventory is empty.".into()]
     } else {
         inventory.iter().map(|item| {
-            // Show additional information, in case it's equipped
-            match item.equipment {
-                Some(equipment) if equipment.equipped => {
-                    format!("{} (on {})", item.name, equipment.slot)
+            match item.item {
+                Some(Item::Sword) => {
+                    if let Some(equipment) = item.equipment {
+                        if equipment.equipped {
+                            // Show additional information, in case it's equipped
+                            format!("{} [+{} power] (on {})", item.name, equipment.power_bonus, equipment.slot)
+                        } else {
+                            // Show power bonus information
+                            format!("{} [+{} power]", item.name, equipment.power_bonus)
+                        }
+                    } else {
+                        item.name.clone()
+                    }
                 }
-                _ => item.name.clone(),
+                Some(Item::Shield) => {
+                    if let Some(equipment) = item.equipment {
+                        if equipment.equipped {
+                            // Show additional information, in case it's equipped
+                            format!("{} [+{} defense] (on {})", item.name, equipment.defense_bonus, equipment.slot)
+                        } else {
+                            // Show defense bonus information
+                            format!("{} [+{} defense]", item.name, equipment.defense_bonus)
+                        }
+                    } else {
+                        item.name.clone()
+                    }
+                }
+                Some(_) => item.name.clone(),
+                None => unreachable!(),
             }
         }).collect()
     };
