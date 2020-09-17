@@ -70,7 +70,7 @@ const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
 
 // Size of the map
 const MAP_WIDTH: i32 = 80;
-const MAP_HEIGHT: i32 = 43;
+const MAP_HEIGHT: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 
 // Room parameters for dungeon generator
 const ROOM_MAX_SIZE: i32 = 10;
