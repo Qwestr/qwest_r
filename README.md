@@ -8,15 +8,13 @@ Originally inspired by [Roguelike Tutorial in Rust + tcod](https://tomassedovic.
 
 ## How To Start
 
-1.  [Install Rust](https://www.rust-lang.org/tools/install)
+1.  [Install Rust](https://www.rust-lang.org/tools/install).
 
-2.  Create a file in the `/prisma` dir called `dev.db`.
+2.  Navigate to the directory where this code was downloaded.
 
-2.  Create a file in the `/prisma` dir called `.env` and `DATABASE_URL="file:./dev.db"`
+3.  Run `cargo build --release` to build the application.
 
-4.  Run `cargo build --release` to build the application
-
-5.  Run `cargo run --release` to start the application
+4.  Run `cargo run --release` to start the application.
 
 ## License
 
