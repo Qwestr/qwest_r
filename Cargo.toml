@@ -1,6 +1,6 @@
 [package]
 name = "qwest_r"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Shawn Daichendt <shawn.daichendt@gmail.com>"]
 edition = "2018"
 description = "A game about games, life, and everything in-between."
@@ -9,3 +9,7 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rand = "0.5.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tcod = { version = "0.15", features = ["serialization"] }
