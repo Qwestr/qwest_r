@@ -646,14 +646,14 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                 "orc" => {
                     // Create an orc
                     let mut object = Object::new(x, y, 'o', "orc", DESATURATED_GREEN, true);
-                    
+
                     // Set orc components
                     object.fighter = Some(Fighter {
-                        hp: 20 + (level as i32 / 2),
-                        base_max_hp: 20 + (level as i32 / 2),
-                        base_defense: 0 + (level as i32 / 4),
+                        hp: 20 + (5 * level as i32 / 2),
+                        base_max_hp: 20 + (5 * level as i32 / 2),
+                        base_defense: 0 + (level as i32 / 3),
                         base_power: 4 + (level as i32 / 3),
-                        xp: 35 + (level as i32 / 2),
+                        xp: 35 + (5 * level as i32 / 2),
                         on_death: DeathCallback::Monster,
                     });
                     object.ai = Some(AI::Basic);
@@ -667,11 +667,11 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
 
                     // Set troll components
                     object.fighter = Some(Fighter {
-                        hp: 30 + (level as i32 / 2),
-                        base_max_hp: 30 + (level as i32 / 2),
-                        base_defense: 2 + (level as i32 / 4),
+                        hp: 30 + (5 * level as i32 / 2),
+                        base_max_hp: 30 + (5 * level as i32 / 2),
+                        base_defense: 2 + (level as i32 / 3),
                         base_power: 8 + (level as i32 / 3),
-                        xp: 100 + (level as i32 / 2),
+                        xp: 100 + (10 * level as i32 / 2),
                         on_death: DeathCallback::Monster,
                     });
                     object.ai = Some(AI::Basic);
@@ -798,7 +798,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                         slot: Slot::RightHand,
                         max_hp_bonus: 0,
                         defense_bonus: 0,
-                        power_bonus: 3,
+                        power_bonus: rand::thread_rng().gen_range(level as i32 - 2, level as i32 + 2),
                     });
 
                     // Return the object
@@ -813,7 +813,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
                         equipped: false,
                         slot: Slot::LeftHand,
                         max_hp_bonus: 0,
-                        defense_bonus: 1,
+                        defense_bonus: rand::thread_rng().gen_range(level as i32 - 2, level as i32 + 2),
                         power_bonus: 0,
                     });
 
