@@ -56,9 +56,10 @@ const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 
 // Sizes and coordinates relevant for the GUI
-const BAR_WIDTH: i32 = 20;
+const BAR_WIDTH: i32 = 30;
 const PANEL_HEIGHT: i32 = 7;
 const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
+const MOUSE_INFO_Y: i32 = PANEL_Y + 2;
 const INVENTORY_WIDTH: i32 = 50;
 const LEVEL_SCREEN_WIDTH: i32 = 40;
 const CHARACTER_SCREEN_WIDTH: i32 = 30;
@@ -70,7 +71,7 @@ const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
 
 // Size of the map
 const MAP_WIDTH: i32 = 80;
-const MAP_HEIGHT: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
+const MAP_HEIGHT: i32 = SCREEN_HEIGHT - MOUSE_INFO_Y;
 
 // Room parameters for dungeon generator
 const ROOM_MAX_SIZE: i32 = 10;
