@@ -649,11 +649,11 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
 
                     // Set orc components
                     object.fighter = Some(Fighter {
-                        hp: 20 + (5 * (level as i32 / 2)),
-                        base_max_hp: 20 + (5 * (level as i32 / 2)),
-                        base_defense: 0 + (level as i32 / 3),
-                        base_power: 4 + (level as i32 / 3),
-                        xp: 35 + (5 * (level as i32 / 2)),
+                        hp: 20 + (2 * (level as i32 / 3)),
+                        base_max_hp: 20 + (2 * (level as i32 / 3)),
+                        base_defense: 0 + (2 * (level as i32 / 3)),
+                        base_power: 4 + (2 * (level as i32 / 3)),
+                        xp: 35 + (5 * (level as i32 / 3)),
                         on_death: DeathCallback::Monster,
                     });
                     object.ai = Some(AI::Basic);
@@ -667,11 +667,11 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>, level: u32) {
 
                     // Set troll components
                     object.fighter = Some(Fighter {
-                        hp: 30 + (5 * (level as i32 / 2)),
-                        base_max_hp: 30 + (5 * (level as i32 / 2)),
-                        base_defense: 2 + (level as i32 / 3),
-                        base_power: 8 + (level as i32 / 3),
-                        xp: 100 + (10 * (level as i32 / 2)),
+                        hp: 30 + (2 * (level as i32 / 3)),
+                        base_max_hp: 30 + (2 * (level as i32 / 3)),
+                        base_defense: 2 + (2 * (level as i32 / 3)),
+                        base_power: 8 + (2 * (level as i32 / 3)),
+                        xp: 100 + (10 * (level as i32 / 3)),
                         on_death: DeathCallback::Monster,
                     });
                     object.ai = Some(AI::Basic);
